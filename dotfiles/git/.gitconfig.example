@@ -1,0 +1,43 @@
+# .gitconfig.example — Git global config template
+# Copy to ~/.gitconfig and fill in your details
+# Usage: cp dotfiles/git/.gitconfig.example ~/.gitconfig
+
+[user]
+    name  = <YOUR_NAME>
+    email = <YOUR_EMAIL>
+
+[core]
+    autocrlf    = true        # Windows: convert LF→CRLF on checkout
+    longpaths   = true
+    excludesfile = ~/.gitignore_global
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[push]
+    autoSetupRemote = true
+
+[diff]
+    tool = vscode
+
+[difftool "vscode"]
+    cmd = code --wait --diff $LOCAL $REMOTE
+
+[merge]
+    tool = vscode
+
+[mergetool "vscode"]
+    cmd = code --wait $MERGED
+
+[alias]
+    st  = status
+    co  = checkout
+    br  = branch
+    lg  = log --oneline --graph --decorate --all
+    undo = reset HEAD~1 --mixed
+
+[credential]
+    helper = manager

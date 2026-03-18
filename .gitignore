@@ -1,0 +1,92 @@
+# ============================================================
+# SECRETS & CREDENTIALS — never commit these
+# ============================================================
+.env
+.env.*
+!.env.example
+secrets/
+*.secret
+*.token
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+credentials.enc
+client_secret.json
+oauth_creds.json
+token_cache.json
+.credentials.json
+google_accounts.json
+*.enc
+
+# ============================================================
+# AI TOOL PRIVATE STATE
+# ============================================================
+# Claude Code
+.claude/sessions/
+.claude/cache/
+.claude/debug/
+.claude/history.jsonl
+.claude/command-audit.log
+.claude/stats-cache.json
+.claude/settings.local.json
+.claude/.credentials.json
+
+# OpenCode
+.opencode/node_modules/
+.opencode/bun.lock
+.opencode/plans/
+
+# Gemini
+.gemini/history/
+.gemini/tmp/
+.gemini/antigravity/
+.gemini/antigravity-browser-profile/
+.gemini/oauth_creds.json
+.gemini/google_accounts.json
+.gemini/installation_id
+.gemini/.encryption_key
+
+# GWS
+.config/gws/.encryption_key
+.config/gws/credentials.enc
+.config/gws/token_cache.json
+
+# ============================================================
+# LOCAL MACHINE STATE
+# ============================================================
+setup-report.local.md
+.machine-id
+*.local.json
+*.local.yaml
+*.local.toml
+
+# ============================================================
+# CACHES & LOGS
+# ============================================================
+*.log
+*.cache
+.cache/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+dist/
+build/
+.venv/
+venv/
+
+# ============================================================
+# OS & EDITOR ARTIFACTS
+# ============================================================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.bak
+*.backup
+*.tmp
+*.swp
+.vscode/settings.json
+.idea/

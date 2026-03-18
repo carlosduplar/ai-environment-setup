@@ -1,0 +1,127 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Secret scan — fail fast if any real tokens appear in the diff
+  # ─────────────────────────────────────────────────────────────────────────────
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets with gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Structural validation — required files present, JSON is valid
+  # ─────────────────────────────────────────────────────────────────────────────
+  validate-structure:
+    name: Validate structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          required=(
+            "README.md"
+            "LICENSE"
+            "SECURITY.md"
+            ".gitignore"
+            "setup-report.md"
+            "templates/.env.example"
+            "bootstrap/bootstrap.ps1"
+            "bootstrap/bootstrap.sh"
+            "bootstrap/verify.ps1"
+            "bootstrap/verify.sh"
+            "bootstrap/lib/utils.ps1"
+            "bootstrap/lib/utils.sh"
+            "manifests/npm-global.json"
+            "manifests/pip-packages.txt"
+            "manifests/winget.json"
+            "manifests/choco.json"
+            "config/claude-code/settings.json.example"
+            "config/claude-code/CLAUDE.md"
+            "config/opencode/opencode.json.example"
+            "config/gemini/GEMINI.md"
+            "config/gemini/mcp-server-enablement.json"
+            "config/github-copilot/README.md"
+            "config/vscode/mcp.json.example"
+            "mcp/README.md"
+            "mcp/mcp-servers.json.example"
+            "skills/README.md"
+            "hooks/README.md"
+            "docs/tools-catalog.md"
+            "docs/skills-catalog.md"
+            "docs/mcp-catalog.md"
+            "docs/hooks-catalog.md"
+            "docs/troubleshooting.md"
+          )
+          missing=()
+          for f in "${required[@]}"; do
+            [[ -f "$f" ]] || missing+=("$f")
+          done
+          if [[ ${#missing[@]} -gt 0 ]]; then
+            echo "Missing required files:"
+            printf '  %s\n' "${missing[@]}"
+            exit 1
+          fi
+          echo "All required files present."
+
+      - name: Validate JSON files
+        run: |
+          find . -name "*.json" \
+            ! -path "./.git/*" \
+            ! -name "*.jsonc" \
+            | while read -r f; do
+              # Skip JSONC files (they contain comments)
+              if grep -q "^[[:space:]]*//" "$f" 2>/dev/null; then
+                echo "SKIP (jsonc): $f"
+                continue
+              fi
+              python3 -m json.tool "$f" > /dev/null 2>&1 && echo "OK: $f" || {
+                echo "INVALID JSON: $f"
+                python3 -m json.tool "$f"
+                exit 1
+              }
+            done
+
+      - name: Check .env.example has no real secrets
+        run: |
+          patterns=(
+            'sk-[a-zA-Z0-9]{32,}'
+            'nvapi-[a-zA-Z0-9_-]{40,}'
+            'AIza[a-zA-Z0-9_-]{35}'
+          )
+          for pattern in "${patterns[@]}"; do
+            if grep -rE "$pattern" templates/ config/ mcp/ skills/ hooks/ 2>/dev/null; then
+              echo "ERROR: Possible secret matching /$pattern/ found in public files"
+              exit 1
+            fi
+          done
+          echo "No obvious secrets found."
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 3. Shell script lint
+  # ─────────────────────────────────────────────────────────────────────────────
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './bootstrap'
+          severity: warning

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://aka.ms/winget-packages.schema.2.0.json",
+  "WinGetVersion": "1.9",
+  "CreationDate": "2026-03-18",
+  "Sources": [
+    {
+      "Packages": [
+        { "PackageIdentifier": "Git.Git" },
+        { "PackageIdentifier": "OpenJS.NodeJS.LTS" },
+        { "PackageIdentifier": "Python.Python.3.11" },
+        { "PackageIdentifier": "GitHub.cli" },
+        { "PackageIdentifier": "Microsoft.PowerShell" },
+        { "PackageIdentifier": "Microsoft.VisualStudioCode" },
+        { "PackageIdentifier": "astral-sh.uv" },
+        { "PackageIdentifier": "Google.CloudSDK" },
+        { "PackageIdentifier": "Microsoft.DotNet.SDK.8" },
+        { "PackageIdentifier": "jqlang.jq" },
+        { "PackageIdentifier": "sharkdp.micro" }
+      ],
+      "SourceDetails": {
+        "Argument": "https://cdn.winget.microsoft.com/cache",
+        "Identifier": "Microsoft.Winget.Source_8wekyb3d8bbwe",
+        "Name": "winget",
+        "Type": "Microsoft.PreIndexed.Package"
+      }
+    }
+  ]
+}

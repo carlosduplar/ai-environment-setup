@@ -1,0 +1,62 @@
+{
+  // Reference MCP configuration — shows all available servers
+  // This is NOT applied directly; copy relevant sections to the per-tool configs.
+  // See: config/opencode/opencode.json.example, config/vscode/mcp.json.example
+
+  "servers": {
+
+    // ── memory ──────────────────────────────────────────────────────────────
+    // In-session persistent key-value memory for AI agents.
+    // No auth required. Data is ephemeral per process unless a file is specified.
+    "memory": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true,
+      "environment": {
+        // Optional: persist memory across sessions
+        // "MEMORY_FILE_PATH": "C:/Users/<YOU>/.config/mcp-memory/memory.json"
+      }
+    },
+
+    // ── bright-data ──────────────────────────────────────────────────────────
+    // Web scraping and search via Bright Data's proxy network.
+    // Requires API token: https://brightdata.com/
+    "bright-data": {
+      "type": "local",
+      "command": ["npx", "-y", "@brightdata/mcp"],
+      "enabled": true,
+      "environment": {
+        "API_TOKEN": "$BRIGHT_DATA_API_TOKEN"
+      }
+    },
+
+    // ── playwright ───────────────────────────────────────────────────────────
+    // Browser automation via Playwright.
+    // Install browsers first: playwright install
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": false
+    },
+
+    // ── github ───────────────────────────────────────────────────────────────
+    // GitHub API integration — issues, PRs, repos.
+    // TODO: add when official GitHub MCP server is stable
+    // "github": {
+    //   "type": "local",
+    //   "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+    //   "enabled": false,
+    //   "environment": {
+    //     "GITHUB_PERSONAL_ACCESS_TOKEN": "$GITHUB_TOKEN"
+    //   }
+    // },
+
+    // ── filesystem ───────────────────────────────────────────────────────────
+    // Expose local directories to AI agents.
+    // "filesystem": {
+    //   "type": "local",
+    //   "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "<ALLOWED_DIR>"],
+    //   "enabled": false
+    // }
+  }
+}

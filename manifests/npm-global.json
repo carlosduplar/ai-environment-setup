@@ -1,0 +1,11 @@
+{
+  "$schema": "./npm-global.schema.json",
+  "description": "npm global packages — installed with 'npm install -g'",
+  "packages": [
+    { "name": "opencode",                 "version": "latest",  "description": "OpenCode AI coding agent" },
+    { "name": "@google/gemini-cli",       "version": "latest",  "description": "Gemini CLI" },
+    { "name": "ctx7",                     "version": "latest",  "description": "Context7 documentation CLI" },
+    { "name": "firebase-tools",           "version": "latest",  "description": "Firebase CLI" },
+    { "name": "@googleworkspace/cli",     "version": "latest",  "description": "Google Workspace CLI (gws)" }
+  ]
+}

@@ -1,0 +1,32 @@
+# Microsoft.PowerShell_profile.ps1.example
+# Copy to $PROFILE (usually: ~/Documents/PowerShell/Microsoft.PowerShell_profile.ps1)
+
+# ── Source private env vars ───────────────────────────────────────────────────
+$envFile = Join-Path $env:USERPROFILE ".env.local"
+if (Test-Path $envFile) {
+    Get-Content $envFile |
+        Where-Object { $_ -notmatch "^\s*#" -and $_ -match "=" } |
+        ForEach-Object {
+            $k, $v = $_ -split "=", 2
+            [System.Environment]::SetEnvironmentVariable($k.Trim(), $v.Trim(), "Process")
+        }
+}
+
+# ── Prompt ────────────────────────────────────────────────────────────────────
+# Uncomment to use oh-my-posh (install: winget install JanDeLaater.OhMyPosh)
+# oh-my-posh init pwsh | Invoke-Expression
+
+# ── Aliases ───────────────────────────────────────────────────────────────────
+Set-Alias -Name ll  -Value Get-ChildItem
+Set-Alias -Name g   -Value git
+Set-Alias -Name oc  -Value opencode
+
+# ── Autocomplete ──────────────────────────────────────────────────────────────
+# gh autocomplete
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+    gh completion -s powershell | Out-String | Invoke-Expression
+}
+
+# ── Helper functions ──────────────────────────────────────────────────────────
+function which([string]$name) { Get-Command $name -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source }
+function touch([string]$path) { New-Item -ItemType File -Path $path -Force | Out-Null }

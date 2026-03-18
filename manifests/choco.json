@@ -1,0 +1,6 @@
+{
+  "description": "Chocolatey packages — installed with 'choco install'",
+  "packages": [
+    { "name": "jq",   "version": "latest", "description": "JSON processor" }
+  ]
+}

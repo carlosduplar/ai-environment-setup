@@ -25,11 +25,11 @@ This repository deliberately excludes MCP (Model Context Protocol) servers in fa
 
 ### 1. Context Window Bloat
 
-MCP servers send schemas, tool descriptions, and discovery payloads to the model on every request. As more MCP servers are added, the context window fills with metadata that has nothing to do with the task. Benchmarks show this can inflate token usage significantly.
+MCP servers send schemas, tool descriptions, and discovery payloads to the model on every request. As more MCP servers are added, the context window fills with metadata that has nothing to do with the task. This inflates token usage significantly.
 
 ### 2. Token Efficiency
 
-CLI calls are leaner — just the command and its output. MCP adds JSON schemas, tool discovery, and structured responses that multiply token usage. Studies show CLI-agent approaches can achieve up to 33% better token efficiency in developer tasks.
+CLI calls are leaner — just the command and its output. MCP adds JSON schemas, tool discovery, and structured responses that multiply token usage. Studies show CLI-agent approaches can achieve up to 33% better token efficiency in developer tasks. The Playwright CLI explicitly recommends CLI over MCP for coding agents because "CLI invocations are more token-efficient: they avoid loading large tool schemas and verbose accessibility trees into the model context."
 
 ### 3. Inspectability and Debugging
 
@@ -37,21 +37,16 @@ CLIs are directly observable: run `gh issue list` in your terminal, see the outp
 
 ### 4. Cost
 
-Fewer tokens mean lower inference costs. MCP's schema overhead adds up, especially for lightweight automation tasks that CLI handles with a single command.
-
-### 5. Explicit Opt-in for Browsers
-
-Only Playwright MCP remains — because browser automation is inherently stateful (requires CDP, session state). For everything else (search, docs, drive, calendar, email), use the corresponding CLI.
+Fewer tokens mean lower inference costs. MCP's schema overhead adds up, especially for lightweight automation tasks that CLI handles with a single command. For users on token-based subscriptions or PAYG accounts, this can burn through credits exponentially faster.
 
 ### Rule: When to Add an MCP Server
 
-Only add an MCP server if ALL of these are true:
-1. No equivalent CLI exists (e.g., `@playwright/mcp`)
-2. The tool is browser-based (requires CDP/state)
-3. The MCP is maintained by the official vendor
-4. It provides meaningful value that CLI cannot replicate
+**Almost never.** Check for a CLI alternative first:
+1. Search for CLI versions of popular MCP products
+2. Use [CLI-Anything](https://github.com/HKUDS/CLI-Anything) to convert open-source repos into CLIs
+3. Only add MCP if no CLI exists and the value justifies the token cost
 
-Otherwise, prefer the CLI. See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory.
+See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory.
 
 ## Repository Layout
 
@@ -113,7 +108,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 | OpenCode | `npm -g opencode` | `~/.config/opencode/opencode.json` |
 | Gemini CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
 | GitHub Copilot CLI | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
-| Playwright | `uv tool install playwright` | Per-project |
+| Playwright CLI | `npm install -g @playwright/cli` | Per-project |
 | Context7 (ctx7) | `npm -g ctx7` | Per-project |
 | Firebase CLI | `npm -g firebase-tools` | `~/.config/configstore/` |
 | gcloud | Google Cloud SDK installer | `~/.config/gcloud/` |
@@ -208,7 +203,7 @@ See [docs/skills-catalog.md](docs/skills-catalog.md) for installed skills.
 | Proprietary internal system prompts | IP protection |
 | Tool caches and session state | Not reproducible |
 | SSH keys | Security |
-| MCP servers (except Playwright) | CLI-first preference — see "Why No MCP Servers?" above |
+| MCP servers | CLI-first preference — see "Why No MCP Servers?" above |
 
 ## Contributing
 

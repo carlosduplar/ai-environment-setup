@@ -55,13 +55,12 @@ ai-environment-setup/
 ├── bootstrap/          # Install + verify scripts
 ├── manifests/          # Package inventories (npm, pip, winget, choco)
 ├── dotfiles/           # Shell and git config examples
-├── config/             # AI tool config scaffolding (no secrets)
+├── config/ # AI tool config scaffolding (no secrets)
 │   ├── claude-code/
 │   ├── opencode/
 │   ├── gemini/
 │   └── github-copilot/
-├── mcp/                # MCP server catalog (minimal)
-├── skills/             # Agent skills catalog
+├── skills/ # Agent skills catalog
 ├── hooks/              # Shared hooks for AI tools
 ├── templates/          # .env.example and setup-report template
 └── docs/               # Reference documentation
@@ -102,20 +101,20 @@ bash bootstrap/verify.sh
 
 See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, their install sources, and required environment variables.
 
-| Tool | Install Method | Config Location |
-|------|---------------|-----------------|
-| Claude Code | `winget install Anthropic.ClaudeCode` / native installer | `~/.claude/settings.json` |
-| OpenCode | `npm -g opencode` | `~/.config/opencode/opencode.json` |
-| Gemini CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
-| GitHub Copilot CLI | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
-| Playwright CLI | `npm install -g @playwright/cli` | Per-project |
-| Context7 (ctx7) | `npm -g ctx7` | Per-project |
-| Firebase CLI | `npm -g firebase-tools` | `~/.config/configstore/` |
-| gcloud | Google Cloud SDK installer | `~/.config/gcloud/` |
-| gws | `npm -g @googleworkspace/cli` | `~/.config/gws/` |
-| markitdown | `uv tool install markitdown` | None |
-| gh | `winget install GitHub.cli` | `~/.config/gh/` |
-| Bright Data | `npm -g @brightdata/cli` | `~/.config/brightdata/` |
+| Tool | Description | Install Method | Config Location |
+|------|-------------|---------------|-----------------|
+| Claude Code | Anthropic's AI coding assistant | `winget install Anthropic.ClaudeCode` / native installer | `~/.claude/settings.json` |
+| OpenCode | OpenCode's AI coding assistant | `npm -g opencode` | `~/.config/opencode/opencode.json` |
+| Gemini CLI | Google's AI CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
+| GitHub Copilot CLI | GitHub's AI coding assistant | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
+| Playwright CLI | Browser automation for testing and scraping | `npm install -g @playwright/cli` | Per-project |
+| Context7 (ctx7) | Fetch current library docs | `npm -g ctx7` | Per-project |
+| Firebase CLI | Firebase project management | `npm -g firebase-tools` | `~/.config/configstore/` |
+| gcloud | Google Cloud SDK CLI | Google Cloud SDK installer | `~/.config/gcloud/` |
+| gws | Google Workspace (Docs, Sheets, Drive, etc.) | `npm -g @googleworkspace/cli` | `~/.config/gws/` |
+| markitdown | Convert documents to Markdown | `uv tool install markitdown` | None |
+| gh | GitHub CLI | `winget install GitHub.cli` | `~/.config/gh/` |
+| Bright Data | Web scraping and search CLI | `npm -g @brightdata/cli` | `~/.config/brightdata/` |
 
 ## Configuration Flow
 

@@ -21,35 +21,27 @@ A **public template repository** capturing a reproducible AI coding environment 
 
 ## Why No MCP Servers? (MCP vs CLI)
 
-This repository deliberately excludes MCP (Model Context Protocol) servers in favor of standalone CLI tools. Here's why:
+This repository deliberately excludes MCP (Model Context Protocol) servers in favor of standalone CLI tools. The core reasons:
 
-### 1. Simplicity and Reliability
+### 1. Context Window Bloat
 
-MCP servers require version-locked npm packages, per-tool JSON configuration, and protocol compatibility. A single MCP server can break across Claude Code, OpenCode, and VSCode independently. CLIs are self-contained — install once, works everywhere.
+MCP servers send schemas, tool descriptions, and discovery payloads to the model on every request. As more MCP servers are added, the context window fills with metadata that has nothing to do with the task. Benchmarks show this can inflate token usage significantly.
 
-### 2. Fast Installation
+### 2. Token Efficiency
 
-```bash
-# MCP: requires config files per tool
-npm install -g @brightdata/cli
-# Add to opencode.json, vscode mcp.json, etc.
+CLI calls are leaner — just the command and its output. MCP adds JSON schemas, tool discovery, and structured responses that multiply token usage. Studies show CLI-agent approaches can achieve up to 33% better token efficiency in developer tasks.
 
-# CLI: just install and use
-npm install -g @brightdata/cli
-brightdata --help
-```
+### 3. Inspectability and Debugging
 
-### 3. Better Documentation
+CLIs are directly observable: run `gh issue list` in your terminal, see the output, pipe it through `jq`, or re-run the command manually. MCP interactions are opaque — they happen inside the protocol, requiring MCP-specific debugging tools. When something breaks, you can always fall back to running the CLI yourself.
 
-CLI tools have comprehensive README docs, active issues, and clear install paths. MCP server docs are often sparse, versioned per-tool, and spread across multiple repos.
+### 4. Cost
 
-### 4. Portable Across Tools
-
-An MCP server configured for Claude Code won't work in OpenCode without a separate config block. A CLI works identically in any shell, script, or tool that spawns a process.
+Fewer tokens mean lower inference costs. MCP's schema overhead adds up, especially for lightweight automation tasks that CLI handles with a single command.
 
 ### 5. Explicit Opt-in for Browsers
 
-Only Playwright MCP remains — because browser automation is inherently stateful and tool-specific. For everything else (search, docs, drive, calendar, email), use the corresponding CLI.
+Only Playwright MCP remains — because browser automation is inherently stateful (requires CDP, session state). For everything else (search, docs, drive, calendar, email), use the corresponding CLI.
 
 ### Rule: When to Add an MCP Server
 
@@ -57,7 +49,7 @@ Only add an MCP server if ALL of these are true:
 1. No equivalent CLI exists (e.g., `@playwright/mcp`)
 2. The tool is browser-based (requires CDP/state)
 3. The MCP is maintained by the official vendor
-4. It works across at least 2 AI tools without custom config
+4. It provides meaningful value that CLI cannot replicate
 
 Otherwise, prefer the CLI. See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory.
 

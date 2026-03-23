@@ -19,7 +19,7 @@ Complete reference for every CLI in this environment.
 
 ### Claude Code
 - **CLI**: `claude`
-- **Install**: Direct binary — https://docs.anthropic.com/claude-code
+- **Install**: W — `winget install Anthropic.ClaudeCode` or native installer script (see https://code.claude.com/docs/en/setup)
 - **Config**: `~/.claude/settings.json`, `~/.claude/CLAUDE.md`
 - **Auth**: `ANTHROPIC_AUTH_TOKEN` env var
 - **Docs**: https://docs.anthropic.com/claude-code
@@ -42,7 +42,7 @@ Complete reference for every CLI in this environment.
 
 ### GitHub Copilot CLI
 - **CLI**: `gh copilot`
-- **Install**: GH — `gh extension install github/gh-copilot`
+- **Install**: W — `winget install GitHub.Copilot` or N — `npm install -g @github/copilot`
 - **Config**: `~/.config/copilot/`
 - **Auth**: `gh auth login` → `GITHUB_TOKEN`
 - **Docs**: https://docs.github.com/copilot/using-github-copilot/using-github-copilot-in-the-command-line
@@ -90,11 +90,7 @@ Complete reference for every CLI in this environment.
 - **Notes**: Credentials stored in `~/.config/gws/` — never commit
 - **Docs**: Internal / see skills catalog
 
-### Atlassian CLI (acli)
-- **CLI**: `acli`
-- **Install**: D — https://acli.atlassian.com
-- **Config**: `~/.config/acli/`
-- **Auth**: `ATLASSIAN_API_TOKEN`, `ATLASSIAN_BASE_URL`, `ATLASSIAN_USER_EMAIL`
+
 
 ---
 
@@ -183,6 +179,4 @@ Complete reference for every CLI in this environment.
 | `GITHUB_TOKEN` | gh, Copilot CLI | Yes |
 | `GOOGLE_CLOUD_PROJECT` | gcloud, Firebase | No |
 | `FIREBASE_TOKEN` | Firebase CI | No |
-| `ATLASSIAN_BASE_URL` | acli | No |
-| `ATLASSIAN_API_TOKEN` | acli | No |
-| `ATLASSIAN_USER_EMAIL` | acli | No |
+

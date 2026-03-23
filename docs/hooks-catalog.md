@@ -63,3 +63,21 @@ No hooks are configured by default. Add hooks to `~/.claude/settings.json` → `
 | `CLAUDE_TOOL_NAME` | Name of the tool being called |
 | `CLAUDE_TOOL_INPUT_PATH` | Path argument for file tools |
 | `CLAUDE_TOOL_INPUT_COMMAND` | Command string for Bash |
+
+## Hook environment variables (Gemini CLI)
+
+| Variable | Value |
+|----------|-------|
+| `GEMINI_TOOL_NAME` | Name of the tool being called |
+| `GEMINI_TOOL_INPUT_PATH` | Path argument for file tools |
+| `GEMINI_TOOL_INPUT_COMMAND` | Command string for Bash |
+
+## Pre‑built hook scripts
+
+The repository includes ready‑to‑use hook scripts for secret‑file protection and compact safety:
+
+- `claude-code-pre-tool-use.sh` / `.ps1` – for Claude Code (uses environment variables)
+- `opencode-pre-tool-use.sh` / `.ps1` – for OpenCode (expects JSON input)
+- `gemini-pre-tool-use.sh` / `.ps1` – for Gemini CLI (uses environment variables)
+
+These are copied to `~/.claude/hooks/`, `~/.config/opencode/hooks/`, and `~/.gemini/hooks/` by the bootstrap scripts. See `hooks/README.md` for details.

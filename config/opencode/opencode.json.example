@@ -148,4 +148,9 @@
     "prune":    true,
     "reserved": 20000
   }
+
+  // Optional: add hooks for secret protection and safety checks
+  // "hooks": {
+  //   "preToolUse": "~/.config/opencode/hooks/pre-tool-use.sh"
+  // }
 }

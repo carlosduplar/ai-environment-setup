@@ -82,7 +82,7 @@ Test-Tool "firebase"
 Test-Tool "gcloud"
 Test-Tool "gws"
 Test-Tool "markitdown"
-Test-Tool "acli"
+
 Test-Tool "npx"
 Test-Tool "uvx"
 

@@ -8,8 +8,18 @@ Hooks allow custom scripts to run at specific points in the AI tool lifecycle �
 |------|-------------|-----------------|
 | Claude Code | Yes (PreToolUse, PostToolUse) | `~/.claude/settings.json` → `hooks` |
 | OpenCode | Yes (bash hooks) | `~/.config/opencode/opencode.json` |
-| Gemini CLI | Limited | N/A |
+| Gemini CLI | Yes (environment variables) | `~/.gemini/hooks/` (referenced in `~/.gemini/settings.json`) |
 | GitHub Copilot CLI | No | N/A |
+
+## Tool‑Specific Hook Scripts
+
+| Tool | Script (bash) | Script (PowerShell) | Description |
+|------|---------------|---------------------|-------------|
+| Claude Code | `claude-code-pre-tool-use.sh` | `claude-code-pre-tool-use.ps1` | Uses environment variables; exit non‑zero to deny. |
+| OpenCode | `opencode-pre-tool-use.sh` | `opencode-pre-tool-use.ps1` | Expects JSON input; outputs JSON with `permissionDecision`. |
+| Gemini CLI | `gemini-pre-tool-use.sh` | `gemini-pre-tool-use.ps1` | Uses environment variables; exit non‑zero to deny. |
+
+These scripts are copied to `~/.claude/hooks/`, `~/.config/opencode/hooks/`, and `~/.gemini/hooks/` by the bootstrap scripts.
 
 ## Hook types (Claude Code)
 

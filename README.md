@@ -76,10 +76,10 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 
 | Tool | Install Method | Config Location |
 |------|---------------|-----------------|
-| Claude Code | `winget` / direct binary | `~/.claude/settings.json` |
+| Claude Code | `winget install Anthropic.ClaudeCode` / native installer script | `~/.claude/settings.json` |
 | OpenCode | `npm -g opencode` | `~/.config/opencode/opencode.json` |
 | Gemini CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
-| GitHub Copilot CLI | `gh extension install` | `~/.config/copilot/` |
+| GitHub Copilot CLI | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
 | Playwright | `uv tool install playwright` | Per-project |
 | Context7 (ctx7) | `npm -g ctx7` | Per-project |
 | Firebase CLI | `npm -g firebase-tools` | `~/.config/configstore/` |
@@ -87,7 +87,6 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 | gws | `npm -g @googleworkspace/cli` | `~/.config/gws/` |
 | markitdown | `uv tool install markitdown` | None |
 | gh | `winget install GitHub.cli` | `~/.config/gh/` |
-| acli | Atlassian CLI installer | `~/.config/acli/` |
 
 ## Configuration Flow
 
@@ -116,6 +115,29 @@ config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI
 - Secrets live in `~/.env.local` (gitignored) or your secret manager.
 - `.example` files show structure only — placeholder values are clearly marked.
 - See [SECURITY.md](SECURITY.md) for the full redaction rules.
+
+## Hooks
+
+Shared hook scripts that run before tool calls to enforce security policies (block secret file access) and safety checks (prevent compaction with uncommitted changes).
+
+| Tool | Hook Support | Hook Script | Configuration |
+|------|-------------|-------------|---------------|
+| Claude Code | Yes (PreToolUse) | `claude-code-pre-tool-use.sh` / `.ps1` | `~/.claude/hooks/` (referenced in `~/.claude/settings.json`) |
+| OpenCode | Yes (bash hooks) | `opencode-pre-tool-use.sh` / `.ps1` | `~/.config/opencode/hooks/` (referenced in `~/.config/opencode/opencode.json`) |
+| Gemini CLI | Yes (environment variables) | `gemini-pre-tool-use.sh` / `.ps1` | `~/.gemini/hooks/` (referenced in `~/.gemini/settings.json`) |
+| GitHub Copilot CLI | No | N/A | N/A |
+
+**What the hooks do:**
+- **Secret file protection** – Deny read/edit/create operations on files matching patterns like `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
+- **Compact safety check** – Block `/compact` commands when the git working tree has uncommitted changes.
+
+**Scope:**
+- Claude Code hooks use environment variables (`CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`) and exit with non‑zero to deny.
+- OpenCode hooks expect JSON input via stdin (keys: `toolName`, `toolArgs`) and output JSON with `permissionDecision`.
+- Gemini CLI hooks use environment variables (`GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`) and exit with non‑zero to deny.
+- GitHub Copilot CLI does not support hooks; secret protection is enforced via the generic pre‑tool‑use hook (which can be manually configured).
+
+See `hooks/README.md` for details on adding custom hooks.
 
 ## What Is Intentionally Excluded
 

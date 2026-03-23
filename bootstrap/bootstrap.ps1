@@ -23,6 +23,7 @@ Assert-EnvFile
 $root = Split-Path $PSScriptRoot -Parent
 $manifestsDir = Join-Path $root "manifests"
 $configDir    = Join-Path $root "config"
+$hooksDir     = Join-Path $root "hooks"
 
 if (-not $DryRun) { . (Join-Path $root "templates\.env.example") }
 
@@ -31,7 +32,7 @@ Write-Step "Starting AI environment bootstrap (Windows 11)"
 # ─────────────────────────────────────────────
 # 1. Package Managers
 # ─────────────────────────────────────────────
-Write-Step "1/8 — Package managers"
+Write-Step "1/9 — Package managers"
 
 if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
     Write-Info "Installing Chocolatey..."
@@ -45,23 +46,25 @@ if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
 # ─────────────────────────────────────────────
 # 2. Core CLIs via winget
 # ─────────────────────────────────────────────
-Write-Step "2/8 — Core CLIs (winget)"
-$wingetPackages = Get-Content (Join-Path $manifestsDir "winget.json") | ConvertFrom-Json
+Write-Step "2/9 — Core CLIs (winget)"
+$wingetData = Get-Content (Join-Path $manifestsDir "winget.json") | ConvertFrom-Json
+$wingetPackages = $wingetData.Sources[0].Packages
 
-foreach ($pkg in $wingetPackages.packages) {
-    $installed = winget list --id $pkg.id --exact --accept-source-agreements 2>&1 | Select-String $pkg.id
+foreach ($pkg in $wingetPackages) {
+    $id = $pkg.PackageIdentifier
+    $installed = winget list --id $id --exact --accept-source-agreements 2>&1 | Select-String $id
     if ($installed -and -not $Update) {
-        Write-OK "$($pkg.id) already installed"
+        Write-OK "$id already installed"
     } else {
-        Write-Info "Installing $($pkg.id)..."
-        Invoke-Command -Cmd { winget install --id $pkg.id --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
+        Write-Info "Installing $id..."
+        Invoke-Command -Cmd { winget install --id $id --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
     }
 }
 
 # ─────────────────────────────────────────────
 # 3. Chocolatey packages
 # ─────────────────────────────────────────────
-Write-Step "3/8 — Chocolatey packages"
+Write-Step "3/9 — Chocolatey packages"
 $chocoPackages = Get-Content (Join-Path $manifestsDir "choco.json") | ConvertFrom-Json
 
 foreach ($pkg in $chocoPackages.packages) {
@@ -75,9 +78,20 @@ foreach ($pkg in $chocoPackages.packages) {
 }
 
 # ─────────────────────────────────────────────
+# 3.5. Verify jq
+# ─────────────────────────────────────────────
+Write-Step "3.5/9 — Verify jq"
+if (-not (Get-Command jq -ErrorAction SilentlyContinue)) {
+    Write-Info "jq not found, installing via Chocolatey..."
+    Invoke-Command -Cmd { choco install jq -y } -DryRun:$DryRun
+} else {
+    Write-OK "jq already installed"
+}
+
+# ─────────────────────────────────────────────
 # 4. Node.js global packages
 # ─────────────────────────────────────────────
-Write-Step "4/8 — npm global packages"
+Write-Step "5/9 — npm global packages"
 Assert-Command "npm" "Node.js / npm is required. Install via winget: winget install OpenJS.NodeJS"
 
 $npmPackages = Get-Content (Join-Path $manifestsDir "npm-global.json") | ConvertFrom-Json
@@ -95,7 +109,7 @@ foreach ($pkg in $npmPackages.packages) {
 # ─────────────────────────────────────────────
 # 5. Python tools via uv
 # ─────────────────────────────────────────────
-Write-Step "5/8 — Python tools (uv)"
+Write-Step "6/9 — Python tools (uv)"
 Assert-Command "uv" "uv is required. Install: winget install astral-sh.uv"
 
 $pipPackages = Get-Content (Join-Path $manifestsDir "pip-packages.txt")
@@ -108,28 +122,47 @@ foreach ($pkg in $pipPackages) {
 }
 
 # ─────────────────────────────────────────────
-# 6. Claude Code (direct binary)
+# 6. Claude Code
 # ─────────────────────────────────────────────
-Write-Step "6/8 — Claude Code"
+Write-Step "7/9 — Claude Code"
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
     Write-Info "Installing Claude Code..."
-    # TODO: Replace with official install command when stable Windows installer is available
-    # https://docs.anthropic.com/claude-code
-    Write-Warn "Claude Code: install manually from https://docs.anthropic.com/claude-code"
-    Write-Warn "Then re-run this script."
+    # Try WinGet first (recommended for Windows)
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Info "Installing via winget..."
+        Invoke-Command -Cmd { winget install Anthropic.ClaudeCode --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
+    } else {
+        # Fallback to native PowerShell installer
+        Write-Info "Winget not found, using native PowerShell installer..."
+        Invoke-Command -Cmd {
+            irm https://claude.ai/install.ps1 | iex
+        } -DryRun:$DryRun
+    }
+    # Verify installation
+    if (Get-Command claude -ErrorAction SilentlyContinue) {
+        Write-OK "Claude Code installed successfully"
+    } else {
+        Write-Warn "Claude Code installation may have failed. Install manually from https://code.claude.com/docs/en/setup"
+    }
 } else { Write-OK "claude already installed" }
 
 # ─────────────────────────────────────────────
 # 7. Apply config scaffolding
 # ─────────────────────────────────────────────
-Write-Step "7/8 — Config scaffolding"
+Write-Step "8/9 — Config scaffolding"
 
 $configs = @(
     @{ src = "$configDir\claude-code\settings.json.example"; dst = "$env:USERPROFILE\.claude\settings.json" },
     @{ src = "$configDir\claude-code\CLAUDE.md";             dst = "$env:USERPROFILE\.claude\CLAUDE.md" },
     @{ src = "$configDir\opencode\opencode.json.example";    dst = "$env:USERPROFILE\.config\opencode\opencode.json" },
     @{ src = "$configDir\gemini\GEMINI.md";                  dst = "$env:USERPROFILE\.gemini\GEMINI.md" },
-    @{ src = "$configDir\gemini\mcp-server-enablement.json"; dst = "$env:USERPROFILE\.gemini\mcp-server-enablement.json" }
+    @{ src = "$configDir\gemini\mcp-server-enablement.json"; dst = "$env:USERPROFILE\.gemini\mcp-server-enablement.json" },
+    @{ src = "$hooksDir\claude-code-pre-tool-use.sh";        dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.sh" },
+    @{ src = "$hooksDir\claude-code-pre-tool-use.ps1";       dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.ps1" },
+    @{ src = "$hooksDir\opencode-pre-tool-use.sh";           dst = "$env:USERPROFILE\.config\opencode\hooks\pre-tool-use.sh" },
+    @{ src = "$hooksDir\opencode-pre-tool-use.ps1";          dst = "$env:USERPROFILE\.config\opencode\hooks\pre-tool-use.ps1" },
+    @{ src = "$hooksDir\gemini-pre-tool-use.sh";             dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
+    @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
 )
 
 foreach ($cfg in $configs) {
@@ -154,11 +187,21 @@ foreach ($cfg in $configs) {
 }
 
 # ─────────────────────────────────────────────
-# 8. gh extensions
+# 8. GitHub Copilot CLI
 # ─────────────────────────────────────────────
-Write-Step "8/8 — gh extensions"
-Assert-Command "gh" "GitHub CLI (gh) is required. winget install GitHub.cli"
-Invoke-Command -Cmd { gh extension install github/gh-copilot } -DryRun:$DryRun -IgnoreError
+Write-Step "9/9 — GitHub Copilot CLI"
+# Install via winget (recommended) or npm
+if (-not (Get-Command "gh" -ErrorAction SilentlyContinue)) {
+    Write-Info "GitHub CLI (gh) not found, installing via winget..."
+    Invoke-Command -Cmd { winget install GitHub.cli --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
+}
+# Install Copilot CLI via winget
+if (-not (Get-Command "gh-copilot" -ErrorAction SilentlyContinue)) {
+    Write-Info "Installing GitHub Copilot CLI via winget..."
+    Invoke-Command -Cmd { winget install GitHub.Copilot --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
+} else {
+    Write-OK "GitHub Copilot CLI already installed"
+}
 
 # ─────────────────────────────────────────────
 # Done

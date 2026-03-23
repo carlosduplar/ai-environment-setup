@@ -43,7 +43,7 @@ For any tool installed manually (not via winget/choco/npm/uv), add it to `docs/t
 
 Tools currently requiring manual install:
 - **Claude Code**: Direct binary from https://docs.anthropic.com/claude-code
-- **acli**: Direct binary from https://acli.atlassian.com
+
 
 ## Phase 5 — Populate .env.local
 
@@ -84,7 +84,7 @@ The real test is applying this to a fresh Windows 11 install:
 ## Known gaps / TODOs
 
 - [ ] Claude Code has no stable Windows installer script yet — manual step required
-- [ ] `acli` has no automated install — add when official installer is available
+
 - [ ] Add per-skill `.md` files for all 37 skills (currently only `context7.md` is included)
 - [ ] Add `dotnet-tools.json` manifest if .NET global tools are added
 - [ ] Add macOS/Linux bootstrap scripts

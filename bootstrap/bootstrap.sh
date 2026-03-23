@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(dirname "$SCRIPT_DIR")"
 MANIFESTS="$ROOT/manifests"
 CONFIG="$ROOT/config"
+HOOKS="$ROOT/hooks"
 
 UPDATE=false
 DRY_RUN=false
@@ -35,7 +36,7 @@ load_env_file
 # ─────────────────────────────────────────────
 # 1. npm global packages
 # ─────────────────────────────────────────────
-step "1/5 — npm global packages"
+step "1/6 — npm global packages"
 while IFS= read -r pkg_name pkg_version; do
     [[ "$pkg_name" == "#"* || -z "$pkg_name" ]] && continue
     if npm list -g --depth=0 2>/dev/null | grep -q "$pkg_name" && [[ "$UPDATE" == "false" ]]; then
@@ -52,9 +53,26 @@ for p in data['packages']:
 ")
 
 # ─────────────────────────────────────────────
+# 1.5. Ensure jq
+# ─────────────────────────────────────────────
+step "1.5/6 — Ensure jq"
+if ! command -v jq &>/dev/null; then
+    info "jq not found, installing via Chocolatey..."
+    if command -v choco &>/dev/null; then
+        run choco install jq -y
+    elif command -v winget &>/dev/null; then
+        run winget install jqlang.jq
+    else
+        warn "Neither Chocolatey nor WinGet found. Please install jq manually."
+    fi
+else
+    ok "jq already installed"
+fi
+
+# ─────────────────────────────────────────────
 # 2. Python tools via uv
 # ─────────────────────────────────────────────
-step "2/5 — Python tools (uv)"
+step "3/6 — Python tools (uv)"
 assert_command "uv" "Install uv: https://docs.astral.sh/uv/getting-started/installation/"
 
 while IFS= read -r pkg; do
@@ -64,16 +82,27 @@ while IFS= read -r pkg; do
 done < "$MANIFESTS/pip-packages.txt"
 
 # ─────────────────────────────────────────────
-# 3. gh extensions
+# 3. GitHub Copilot CLI
 # ─────────────────────────────────────────────
-step "3/5 — gh extensions"
+step "4/6 — GitHub Copilot CLI"
 assert_command "gh" "Install gh: https://cli.github.com"
-run gh extension install github/gh-copilot || warn "gh-copilot extension already installed or failed"
+# Install Copilot CLI via npm (recommended) or curl
+if command -v npm &>/dev/null; then
+    if npm list -g @github/copilot &>/dev/null; then
+        ok "GitHub Copilot CLI already installed via npm"
+    else
+        info "Installing GitHub Copilot CLI via npm..."
+        run npm install -g @github/copilot
+    fi
+else
+    warn "npm not found, trying curl installation..."
+    run curl -fsSL https://gh.io/copilot-install | bash
+fi
 
 # ─────────────────────────────────────────────
 # 4. Config scaffolding
 # ─────────────────────────────────────────────
-step "4/5 — Config scaffolding"
+step "5/6 — Config scaffolding"
 HOME_DIR="$HOME"
 
 declare -A CONFIGS=(
@@ -82,6 +111,12 @@ declare -A CONFIGS=(
     ["$CONFIG/opencode/opencode.json.example"]="$HOME_DIR/.config/opencode/opencode.json"
     ["$CONFIG/gemini/GEMINI.md"]="$HOME_DIR/.gemini/GEMINI.md"
     ["$CONFIG/gemini/mcp-server-enablement.json"]="$HOME_DIR/.gemini/mcp-server-enablement.json"
+    ["$HOOKS/claude-code-pre-tool-use.sh"]="$HOME_DIR/.claude/hooks/pre-tool-use.sh"
+    ["$HOOKS/claude-code-pre-tool-use.ps1"]="$HOME_DIR/.claude/hooks/pre-tool-use.ps1"
+    ["$HOOKS/opencode-pre-tool-use.sh"]="$HOME_DIR/.config/opencode/hooks/pre-tool-use.sh"
+    ["$HOOKS/opencode-pre-tool-use.ps1"]="$HOME_DIR/.config/opencode/hooks/pre-tool-use.ps1"
+    ["$HOOKS/gemini-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
+    ["$HOOKS/gemini-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
 )
 
 for src in "${!CONFIGS[@]}"; do
@@ -93,6 +128,9 @@ for src in "${!CONFIGS[@]}"; do
         if [[ "$DRY_RUN" == "false" ]]; then
             mkdir -p "$(dirname "$dst")"
             cp "$src" "$dst"
+            if [[ "$dst" == *.sh ]]; then
+                chmod +x "$dst" 2>/dev/null || true
+            fi
         fi
     fi
 done
@@ -100,11 +138,23 @@ done
 # ─────────────────────────────────────────────
 # 5. Claude Code
 # ─────────────────────────────────────────────
-step "5/5 — Claude Code"
+step "6/6 — Claude Code"
 if command -v claude &>/dev/null; then
     ok "claude already installed"
 else
-    warn "Claude Code not found. Install from: https://docs.anthropic.com/claude-code"
+    info "Installing Claude Code..."
+    # Use native bash installer (requires curl)
+    if command -v curl &>/dev/null; then
+        run curl -fsSL https://claude.ai/install.sh | bash
+        # Verify installation
+        if command -v claude &>/dev/null; then
+            ok "Claude Code installed successfully"
+        else
+            warn "Claude Code installation may have failed. Install manually from https://code.claude.com/docs/en/setup"
+        fi
+    else
+        warn "curl not found. Install Claude Code manually from https://code.claude.com/docs/en/setup"
+    fi
 fi
 
 # ─────────────────────────────────────────────

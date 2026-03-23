@@ -42,5 +42,15 @@
   },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
-  }
+  },
+  // Optional: add hooks for secret protection and safety checks
+  // "hooks": {
+  //   "PreToolUse": [{
+  //     "matcher": ".*",
+  //     "hooks": [{
+  //       "type": "command",
+  //       "command": "~/.claude/hooks/pre-tool-use.sh"
+  //     }]
+  //   }]
+  // }
 }

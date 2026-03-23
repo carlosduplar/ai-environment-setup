@@ -26,7 +26,6 @@ Run `bootstrap\verify.ps1` and paste output here:
 ## MCP Servers Configured
 
 - [ ] memory
-- [ ] bright-data
 - [ ] playwright (optional)
 - [ ] <!-- add others -->
 

@@ -6,6 +6,7 @@
     { "name": "@google/gemini-cli",       "version": "latest",  "description": "Gemini CLI" },
     { "name": "ctx7",                     "version": "latest",  "description": "Context7 documentation CLI" },
     { "name": "firebase-tools",           "version": "latest",  "description": "Firebase CLI" },
-    { "name": "@googleworkspace/cli",     "version": "latest",  "description": "Google Workspace CLI (gws)" }
+    { "name": "@googleworkspace/cli",     "version": "latest",  "description": "Google Workspace CLI (gws)" },
+    { "name": "@brightdata/cli",          "version": "latest",  "description": "Bright Data CLI for web scraping and search" }
   ]
 }

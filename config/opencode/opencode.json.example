@@ -5,15 +5,7 @@
 
   // ── MCP servers ─────────────────────────────────────────────────────────────
   "mcp": {
-    "bright-data": {
-      "type": "local",
-      "command": ["npx", "-y", "@brightdata/mcp"],
-      "enabled": true,
-      "environment": {
-        // TODO: replace with your actual token from .env.local
-        "API_TOKEN": "$BRIGHT_DATA_API_TOKEN"
-      }
-    },
+
     "memory": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],

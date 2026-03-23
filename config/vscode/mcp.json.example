@@ -4,12 +4,7 @@
   // Apply via: cp config/vscode/mcp.json.example %APPDATA%\Code\User\mcp.json
 
   "inputs": [
-    {
-      "id": "bright_data_token",
-      "type": "promptString",
-      "description": "Bright Data API token",
-      "password": true
-    },
+
     {
       "id": "memory_file_path",
       "type": "promptString",
@@ -26,14 +21,7 @@
         "MEMORY_FILE_PATH": "${input:memory_file_path}"
       }
     },
-    // ── bright-data ──────────────────────────────────────────────────────────
-    "bright-data": {
-      "command": "npx",
-      "args": ["-y", "@brightdata/mcp"],
-      "env": {
-        "API_TOKEN": "${input:bright_data_token}"
-      }
-    }
+
     // Add more MCP servers here — see mcp/mcp-servers.json.example
   }
 }

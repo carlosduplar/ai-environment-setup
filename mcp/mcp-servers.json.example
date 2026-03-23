@@ -18,17 +18,7 @@
       }
     },
 
-    // ── bright-data ──────────────────────────────────────────────────────────
-    // Web scraping and search via Bright Data's proxy network.
-    // Requires API token: https://brightdata.com/
-    "bright-data": {
-      "type": "local",
-      "command": ["npx", "-y", "@brightdata/mcp"],
-      "enabled": true,
-      "environment": {
-        "API_TOKEN": "$BRIGHT_DATA_API_TOKEN"
-      }
-    },
+
 
     // ── playwright ───────────────────────────────────────────────────────────
     // Browser automation via Playwright.

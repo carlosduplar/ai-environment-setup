@@ -70,9 +70,30 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 2. Python tools via uv
+# 2. Install agent skills
 # ─────────────────────────────────────────────
-step "3/6 — Python tools (uv)"
+step "2/6 — Install agent skills"
+skill_repos=(
+    "anthropics/skills"
+    "browser-use/browser-use"
+    "vercel-labs/skills"
+    "github/awesome-copilot"
+    "googleworkspace/cli"
+    "testdino-hq/playwright-skill/playwright-cli"
+    "coreyhaines31/marketingskills"
+    "vercel-labs/agent-skills"
+)
+for repo in "${skill_repos[@]}"; do
+    info "Installing skills from $repo..."
+    run npx skills add "$repo"
+done
+info "Installing bright-data-mcp skill..."
+run npx skills add https://github.com/brightdata/skills --skill bright-data-mcp
+
+# ─────────────────────────────────────────────
+# 3. Python tools via uv
+# ─────────────────────────────────────────────
+step "4/6 — Python tools (uv)"
 assert_command "uv" "Install uv: https://docs.astral.sh/uv/getting-started/installation/"
 
 while IFS= read -r pkg; do
@@ -82,9 +103,9 @@ while IFS= read -r pkg; do
 done < "$MANIFESTS/pip-packages.txt"
 
 # ─────────────────────────────────────────────
-# 3. GitHub Copilot CLI
+# 4. GitHub Copilot CLI
 # ─────────────────────────────────────────────
-step "4/6 — GitHub Copilot CLI"
+step "5/6 — GitHub Copilot CLI"
 assert_command "gh" "Install gh: https://cli.github.com"
 # Install Copilot CLI via npm (recommended) or curl
 if command -v npm &>/dev/null; then
@@ -100,9 +121,9 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# 4. Config scaffolding
+# 5. Config scaffolding
 # ─────────────────────────────────────────────
-step "5/6 — Config scaffolding"
+step "6/6 — Config scaffolding"
 HOME_DIR="$HOME"
 
 declare -A CONFIGS=(
@@ -138,7 +159,7 @@ done
 # ─────────────────────────────────────────────
 # 5. Claude Code
 # ─────────────────────────────────────────────
-step "6/6 — Claude Code"
+step "7/6 — Claude Code"
 if command -v claude &>/dev/null; then
     ok "claude already installed"
 else

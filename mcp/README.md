@@ -11,7 +11,6 @@ MCP (Model Context Protocol) is an open standard that lets AI assistants call ex
 | Server | Package | Used By | Auth |
 |--------|---------|---------|------|
 | memory | `@modelcontextprotocol/server-memory` | OpenCode, VSCode | None |
-| bright-data | `@brightdata/mcp` | OpenCode, VSCode | `BRIGHT_DATA_API_TOKEN` |
 | playwright | `@playwright/mcp` | Gemini (optional) | None |
 
 ## Adding a New Server

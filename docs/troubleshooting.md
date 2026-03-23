@@ -24,11 +24,12 @@ CLAUDE.md must be at `~/.claude/CLAUDE.md` for global scope or in the project ro
 
 ## OpenCode
 
-### MCP server fails to start
+### Bright Data CLI authentication
 ```powershell
-# Test the MCP server manually
-npx -y @brightdata/mcp
-# Check for missing BRIGHT_DATA_API_TOKEN
+# Authenticate with Bright Data CLI
+brightdata login
+# Or set API key via environment variable
+$env:BRIGHTDATA_API_KEY = "your_key"
 ```
 
 ### `opencode: command not found` after `npm install -g opencode`

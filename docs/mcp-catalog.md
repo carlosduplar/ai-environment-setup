@@ -5,7 +5,6 @@ All Model Context Protocol servers configured in this environment.
 | Server | Package | Auth | Tools |
 |--------|---------|------|-------|
 | [memory](../mcp/servers/memory.md) | `@modelcontextprotocol/server-memory` | None | key-value store |
-| [bright-data](../mcp/servers/bright-data.md) | `@brightdata/mcp` | `BRIGHT_DATA_API_TOKEN` | web scrape, search |
 | [playwright](../mcp/servers/playwright.md) | `@playwright/mcp` | None | browser automation |
 
 ## Adding a server

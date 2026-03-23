@@ -107,6 +107,27 @@ foreach ($pkg in $npmPackages.packages) {
 }
 
 # ─────────────────────────────────────────────
+# 4.5. Install agent skills
+# ─────────────────────────────────────────────
+Write-Step "5.5/9 — Install agent skills"
+$skillRepos = @(
+    "anthropics/skills",
+    "browser-use/browser-use",
+    "vercel-labs/skills",
+    "github/awesome-copilot",
+    "googleworkspace/cli",
+    "testdino-hq/playwright-skill/playwright-cli",
+    "coreyhaines31/marketingskills",
+    "vercel-labs/agent-skills"
+)
+foreach ($repo in $skillRepos) {
+    Write-Info "Installing skills from $repo..."
+    Invoke-Command -Cmd { npx skills add $repo } -DryRun:$DryRun
+}
+Write-Info "Installing bright-data-mcp skill..."
+Invoke-Command -Cmd { npx skills add https://github.com/brightdata/skills --skill bright-data-mcp } -DryRun:$DryRun
+
+# ─────────────────────────────────────────────
 # 5. Python tools via uv
 # ─────────────────────────────────────────────
 Write-Step "6/9 — Python tools (uv)"

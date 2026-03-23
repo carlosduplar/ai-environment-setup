@@ -25,7 +25,6 @@ Run `bootstrap\verify.ps1` and paste output here:
 
 ## MCP Servers Configured
 
-- [ ] memory
 - [ ] playwright (optional)
 - [ ] <!-- add others -->
 

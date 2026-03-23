@@ -172,7 +172,7 @@ Complete reference for every CLI in this environment.
 |----------|------|----------|
 | `ANTHROPIC_AUTH_TOKEN` | Claude Code | Yes |
 | `ANTHROPIC_BASE_URL` | Claude Code | No (proxy only) |
-| `BRIGHT_DATA_API_TOKEN` | OpenCode MCP, VSCode MCP | Yes |
+| `BRIGHTDATA_API_KEY` | Bright Data CLI | Yes |
 | `NVIDIA_API_KEY` | OpenCode (nvidia provider) | No |
 | `OPENROUTER_API_KEY` | OpenCode (openrouter provider) | No |
 | `MISTRAL_API_KEY` | OpenCode (mistral provider) | No |

@@ -4,7 +4,6 @@ All Model Context Protocol servers configured in this environment.
 
 | Server | Package | Auth | Tools |
 |--------|---------|------|-------|
-| [memory](../mcp/servers/memory.md) | `@modelcontextprotocol/server-memory` | None | key-value store |
 | [playwright](../mcp/servers/playwright.md) | `@playwright/mcp` | None | browser automation |
 
 ## Adding a server

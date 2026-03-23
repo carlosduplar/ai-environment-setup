@@ -5,19 +5,61 @@ A **public template repository** capturing a reproducible AI coding environment 
 ## What This Repo Does
 
 - Documents every CLI tool and its install source
-- Provides safe, secret-free config scaffolding for OpenCode, Claude Code, Gemini CLI, GitHub Copilot CLI, and shared MCPs
+- Provides safe, secret-free config scaffolding for OpenCode, Claude Code, Gemini CLI, GitHub Copilot CLI
 - Ships bootstrap scripts to install everything from scratch
 - Ships verify scripts to assert a machine is in the expected state
-- Catalogs shared skills, MCP servers, and hooks
+- Catalogs shared skills and hooks
 
 ## Supported Platforms
 
 | Platform | Status |
 |----------|--------|
-| Windows 11 + PowerShell 7 | ✅ Primary target |
-| Windows 11 + Git Bash | ✅ Supported |
-| macOS | 🔲 Planned |
-| Linux | 🔲 Planned |
+| Windows 11 + PowerShell 7 | Primary target |
+| Windows 11 + Git Bash | Supported |
+| macOS | Planned |
+| Linux | Planned |
+
+## Why No MCP Servers? (MCP vs CLI)
+
+This repository deliberately excludes MCP (Model Context Protocol) servers in favor of standalone CLI tools. Here's why:
+
+### 1. Simplicity and Reliability
+
+MCP servers require version-locked npm packages, per-tool JSON configuration, and protocol compatibility. A single MCP server can break across Claude Code, OpenCode, and VSCode independently. CLIs are self-contained — install once, works everywhere.
+
+### 2. Fast Installation
+
+```bash
+# MCP: requires config files per tool
+npm install -g @brightdata/cli
+# Add to opencode.json, vscode mcp.json, etc.
+
+# CLI: just install and use
+npm install -g @brightdata/cli
+brightdata --help
+```
+
+### 3. Better Documentation
+
+CLI tools have comprehensive README docs, active issues, and clear install paths. MCP server docs are often sparse, versioned per-tool, and spread across multiple repos.
+
+### 4. Portable Across Tools
+
+An MCP server configured for Claude Code won't work in OpenCode without a separate config block. A CLI works identically in any shell, script, or tool that spawns a process.
+
+### 5. Explicit Opt-in for Browsers
+
+Only Playwright MCP remains — because browser automation is inherently stateful and tool-specific. For everything else (search, docs, drive, calendar, email), use the corresponding CLI.
+
+### Rule: When to Add an MCP Server
+
+Only add an MCP server if ALL of these are true:
+1. No equivalent CLI exists (e.g., `@playwright/mcp`)
+2. The tool is browser-based (requires CDP/state)
+3. The MCP is maintained by the official vendor
+4. It works across at least 2 AI tools without custom config
+
+Otherwise, prefer the CLI. See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory.
 
 ## Repository Layout
 
@@ -30,10 +72,9 @@ ai-environment-setup/
 │   ├── claude-code/
 │   ├── opencode/
 │   ├── gemini/
-│   ├── github-copilot/
-│   └── vscode/
-├── mcp/                # MCP server catalog and example configs
-├── skills/             # Claude Code skills catalog
+│   └── github-copilot/
+├── mcp/                # MCP server catalog (minimal)
+├── skills/             # Agent skills catalog
 ├── hooks/              # Shared hooks for AI tools
 ├── templates/          # .env.example and setup-report template
 └── docs/               # Reference documentation
@@ -76,7 +117,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 
 | Tool | Install Method | Config Location |
 |------|---------------|-----------------|
-| Claude Code | `winget install Anthropic.ClaudeCode` / native installer script | `~/.claude/settings.json` |
+| Claude Code | `winget install Anthropic.ClaudeCode` / native installer | `~/.claude/settings.json` |
 | OpenCode | `npm -g opencode` | `~/.config/opencode/opencode.json` |
 | Gemini CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
 | GitHub Copilot CLI | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
@@ -87,6 +128,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 | gws | `npm -g @googleworkspace/cli` | `~/.config/gws/` |
 | markitdown | `uv tool install markitdown` | None |
 | gh | `winget install GitHub.cli` | `~/.config/gh/` |
+| Bright Data | `npm -g @brightdata/cli` | `~/.config/brightdata/` |
 
 ## Configuration Flow
 
@@ -118,26 +160,50 @@ config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI
 
 ## Hooks
 
-Shared hook scripts that run before tool calls to enforce security policies (block secret file access) and safety checks (prevent compaction with uncommitted changes).
+Shared hook scripts that run before tool calls to enforce security policies and safety checks.
 
-| Tool | Hook Support | Hook Script | Configuration |
-|------|-------------|-------------|---------------|
-| Claude Code | Yes (PreToolUse) | `claude-code-pre-tool-use.sh` / `.ps1` | `~/.claude/hooks/` (referenced in `~/.claude/settings.json`) |
-| OpenCode | Yes (bash hooks) | `opencode-pre-tool-use.sh` / `.ps1` | `~/.config/opencode/hooks/` (referenced in `~/.config/opencode/opencode.json`) |
-| Gemini CLI | Yes (environment variables) | `gemini-pre-tool-use.sh` / `.ps1` | `~/.gemini/hooks/` (referenced in `~/.gemini/settings.json`) |
-| GitHub Copilot CLI | No | N/A | N/A |
+### Rule: Hook Design Principles
 
-**What the hooks do:**
-- **Secret file protection** – Deny read/edit/create operations on files matching patterns like `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
-- **Compact safety check** – Block `/compact` commands when the git working tree has uncommitted changes.
+1. **Fail closed** — deny by default, allow explicitly
+2. **Never execute AI output** — validate all inputs before running commands
+3. **Log decisions** — track why access was granted or denied
+4. **Platform-aware** — provide both `.sh` (Git Bash) and `.ps1` (PowerShell) versions
+5. **Tool-specific** — each AI tool has different hook interfaces (env vars, JSON stdin, etc.)
 
-**Scope:**
-- Claude Code hooks use environment variables (`CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`) and exit with non‑zero to deny.
-- OpenCode hooks expect JSON input via stdin (keys: `toolName`, `toolArgs`) and output JSON with `permissionDecision`.
-- Gemini CLI hooks use environment variables (`GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`) and exit with non‑zero to deny.
-- GitHub Copilot CLI does not support hooks; secret protection is enforced via the generic pre‑tool‑use hook (which can be manually configured).
+### Pre-Built Hooks
 
-See `hooks/README.md` for details on adding custom hooks.
+| Tool | Hook Script | Mechanism |
+|------|-------------|-----------|
+| Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny |
+| OpenCode | `opencode-pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` |
+| Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny |
+
+### What the Hooks Do
+
+- **Secret file protection** — Deny read/edit/create on `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
+- **Compact safety check** — Block `/compact` when git working tree has uncommitted changes
+
+### Hook Scope by Tool
+
+- **Claude Code**: Uses `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
+- **OpenCode**: Receives JSON via stdin: `{"toolName": "Read", "toolArgs": {"filePath": "..."}}`. Output: `{"permissionDecision": "allow"}` or `{"permissionDecision": "deny", "reason": "..."}`.
+- **Gemini CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
+- **GitHub Copilot CLI**: No hook support. Secret protection enforced via generic pre-tool-use hook (manual config).
+
+See [hooks/README.md](hooks/README.md) and [docs/hooks-catalog.md](docs/hooks-catalog.md) for details.
+
+## Skills
+
+Agent skills extend AI tool capabilities. Installed via `npx skills add <repo>`.
+
+### Rule: When to Add a Skill
+
+Add a skill if:
+1. The skill automates a recurring workflow (docs, sheets, calendar, email)
+2. It replaces manual CLI invocations
+3. It is maintained by a reputable vendor
+
+See [docs/skills-catalog.md](docs/skills-catalog.md) for installed skills.
 
 ## What Is Intentionally Excluded
 
@@ -150,6 +216,7 @@ See `hooks/README.md` for details on adding custom hooks.
 | Proprietary internal system prompts | IP protection |
 | Tool caches and session state | Not reproducible |
 | SSH keys | Security |
+| MCP servers (except Playwright) | CLI-first preference — see "Why No MCP Servers?" above |
 
 ## Contributing
 

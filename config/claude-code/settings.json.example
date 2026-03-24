@@ -1,14 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  // Apply via: cp config/claude-code/settings.json.example ~/.claude/settings.json
-  // Then edit to substitute $ENV_VAR placeholders with actual values from .env.local
   "env": {
-    // ── Model routing ──────────────────────────────────────────────────────
-    // Default: use Anthropic directly. Set ANTHROPIC_BASE_URL to proxy if needed.
     "ANTHROPIC_AUTH_TOKEN": "$ANTHROPIC_AUTH_TOKEN",
-    // "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
-
-    // Telemetry opt-out
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "true",
     "DISABLE_ERROR_REPORTING": "true",
     "DISABLE_TELEMETRY": "true"
@@ -43,14 +36,13 @@
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": true
   },
-  // Optional: add hooks for secret protection and safety checks
-  // "hooks": {
-  //   "PreToolUse": [{
-  //     "matcher": ".*",
-  //     "hooks": [{
-  //       "type": "command",
-  //       "command": "~/.claude/hooks/pre-tool-use.sh"
-  //     }]
-  //   }]
-  // }
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/pre-tool-use.sh"
+      }]
+    }]
+  }
 }

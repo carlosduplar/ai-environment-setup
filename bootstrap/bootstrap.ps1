@@ -180,8 +180,7 @@ $configs = @(
     @{ src = "$configDir\gemini\mcp-server-enablement.json"; dst = "$env:USERPROFILE\.gemini\mcp-server-enablement.json" },
     @{ src = "$hooksDir\claude-code-pre-tool-use.sh";        dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.sh" },
     @{ src = "$hooksDir\claude-code-pre-tool-use.ps1";       dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.ps1" },
-    @{ src = "$hooksDir\opencode-pre-tool-use.sh";           dst = "$env:USERPROFILE\.config\opencode\hooks\pre-tool-use.sh" },
-    @{ src = "$hooksDir\opencode-pre-tool-use.ps1";          dst = "$env:USERPROFILE\.config\opencode\hooks\pre-tool-use.ps1" },
+    @{ src = "$configDir\opencode\plugins\security.js";       dst = "$env:USERPROFILE\.config\opencode\plugins\security.js" },
     @{ src = "$hooksDir\gemini-pre-tool-use.sh";             dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
     @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
 )

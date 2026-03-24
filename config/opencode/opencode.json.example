@@ -1,72 +1,39 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  // Apply via: cp config/opencode/opencode.json.example ~/.config/opencode/opencode.json
-  // Substitute all $ENV_VAR placeholders from .env.local
-
-  // ── MCP servers ─────────────────────────────────────────────────────────────
-  "mcp": {
-
-    "memory": {
-      "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
-      "enabled": true
-    }
-    // Add more MCP servers here — see mcp/mcp-servers.json.example
-  },
-
-  // ── Permission model ─────────────────────────────────────────────────────────
   "permission": {
     "*": "ask",
     "read": "allow",
     "edit": "ask",
     "bash": {
       "*": "ask",
-      "git status*":    "allow",
-      "git diff*":      "allow",
-      "git log*":       "allow",
-      "git show*":      "allow",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
       "git rev-parse*": "allow",
-      "git ls-files*":  "allow",
-      "rg *":           "allow",
-      "grep *":         "allow",
-      "ls*":            "allow",
-      "cat*":           "allow",
-      "npm *":          "ask",
-      "pnpm *":         "ask",
-      "node *":         "ask",
-      "curl *":         "ask",
-      "wget *":         "ask",
-      "rm *":           "deny",
-      "sudo *":         "deny"
+      "git ls-files*": "allow",
+      "rg *": "allow",
+      "grep *": "allow",
+      "ls*": "allow",
+      "cat*": "allow",
+      "npm *": "ask",
+      "pnpm *": "ask",
+      "node *": "ask",
+      "curl *": "ask",
+      "wget *": "ask",
+      "rm *": "deny",
+      "sudo *": "deny"
     },
-    "webfetch":           "ask",
-    "websearch":          "ask",
-    "codesearch":         "ask",
+    "webfetch": "ask",
+    "websearch": "ask",
+    "codesearch": "ask",
     "external_directory": "ask",
-    "doom_loop":          "ask"
+    "doom_loop": "ask"
   },
-
-  // ── Agent definitions ─────────────────────────────────────────────────────────
-  // Each agent targets a specific task with an appropriate model and permission set.
   "agent": {
-    "triage": {
-      // Fast, cheap model for initial analysis and routing
-      "model": "google-vertex/gemini-2.0-flash",
-      "reasoningEffort": "low",
-      "options": { "temperature": 0.15 },
-      "permission": {
-        "edit": "deny",
-        "bash": "deny",
-        "webfetch": "ask",
-        "websearch": "ask",
-        "codesearch": "ask"
-      }
-    },
     "plan": {
-      // Medium model for planning — no writes
-      "model": "google-vertex/gemini-2.0-flash",
+      "model": "github-copilot/claude-sonnet-4.6",
       "reasoningEffort": "high",
-      "options": { "temperature": 0.2 },
       "permission": {
         "edit": "deny",
         "bash": "deny",
@@ -76,73 +43,35 @@
       }
     },
     "build": {
-      // Capable model for implementation tasks
-      // TODO: replace with your preferred model
-      "model": "openrouter/anthropic/claude-sonnet-4-5",
+      "model": "opencode/mimo-v2-pro-free",
       "reasoningEffort": "high",
-      "options": { "temperature": 0.2 },
       "permission": {
         "edit": "ask",
         "bash": {
-          "*":           "ask",
+          "*": "ask",
           "git status*": "allow",
-          "git diff*":   "allow",
-          "rg *":        "allow",
-          "grep *":      "allow",
-          "rm *":        "deny",
-          "sudo *":      "deny"
+          "git diff*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "rm *": "deny",
+          "sudo *": "deny"
         },
         "webfetch": "ask",
         "websearch": "ask",
         "codesearch": "ask"
       }
-    },
-    "review": {
-      // Read-only agent for code review
-      "model": "mistral/codestral-latest",
-      "reasoningEffort": "medium",
-      "options": { "temperature": 0.1 },
-      "permission": {
-        "edit":      "deny",
-        "bash":      "deny",
-        "webfetch":  "deny",
-        "websearch": "deny",
-        "codesearch": "deny"
-      }
-    },
-    "security": {
-      // Dedicated agent for security analysis
-      "model": "mistral/devstral-medium-latest",
-      "reasoningEffort": "high",
-      "options": { "temperature": 0.1 },
-      "permission": {
-        "edit":      "deny",
-        "bash":      "deny",
-        "webfetch":  "ask",
-        "websearch": "ask",
-        "codesearch": "ask"
-      }
     }
   },
-
-  // ── Provider options ──────────────────────────────────────────────────────────
   "provider": {
     "github-copilot": { "options": { "timeout": 600000, "setCacheKey": true } },
-    "mistral":        { "options": { "timeout": 600000, "setCacheKey": true } },
-    "openrouter":     { "options": { "timeout": 600000, "setCacheKey": true } },
-    "nvidia":         { "options": { "timeout": 600000, "setCacheKey": true } },
-    "google-vertex":  { "options": { "timeout": 600000, "setCacheKey": true } }
+    "mistral": { "options": { "timeout": 600000, "setCacheKey": true } },
+    "openrouter": { "options": { "timeout": 600000, "setCacheKey": true } },
+    "nvidia": { "options": { "timeout": 600000, "setCacheKey": true } },
+    "google-vertex": { "options": { "timeout": 600000, "setCacheKey": true } }
   },
-
-  // ── Compaction ────────────────────────────────────────────────────────────────
   "compaction": {
-    "auto":     true,
-    "prune":    true,
+    "auto": true,
+    "prune": true,
     "reserved": 20000
   }
-
-  // Optional: add hooks for secret protection and safety checks
-  // "hooks": {
-  //   "preToolUse": "~/.config/opencode/hooks/pre-tool-use.sh"
-  // }
 }

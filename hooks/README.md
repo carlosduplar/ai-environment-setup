@@ -4,24 +4,27 @@ Hooks allow custom scripts to run at specific points in the AI tool lifecycle �
 
 ## Supported Tools
 
-| Tool | Hook Support | Config Location |
-|------|-------------|-----------------|
-| Claude Code | Yes (PreToolUse, PostToolUse) | `~/.claude/settings.json` → `hooks` |
-| OpenCode | Yes (bash hooks) | `~/.config/opencode/opencode.json` |
-| Gemini CLI | Yes (environment variables) | `~/.gemini/hooks/` (referenced in `~/.gemini/settings.json`) |
+| Tool | Hook Mechanism | Config Location |
+|------|---------------|-----------------|
+| Claude Code | Shell scripts | `~/.claude/settings.json` → `hooks` |
+| OpenCode | JS/TS plugins | `~/.config/opencode/plugins/*.js` |
+| Gemini CLI | Shell scripts | `~/.gemini/settings.json` → `hooks` |
 | GitHub Copilot CLI | No | N/A |
 
-## Tool‑Specific Hook Scripts
+## Claude Code
 
-| Tool | Script (bash) | Script (PowerShell) | Description |
-|------|---------------|---------------------|-------------|
-| Claude Code | `claude-code-pre-tool-use.sh` | `claude-code-pre-tool-use.ps1` | Uses environment variables; exit non‑zero to deny. |
-| OpenCode | `opencode-pre-tool-use.sh` | `opencode-pre-tool-use.ps1` | Expects JSON input; outputs JSON with `permissionDecision`. |
-| Gemini CLI | `gemini-pre-tool-use.sh` | `gemini-pre-tool-use.ps1` | Uses environment variables; exit non‑zero to deny. |
+Shell scripts referenced from `~/.claude/settings.json`:
 
-These scripts are copied to `~/.claude/hooks/`, `~/.config/opencode/hooks/`, and `~/.gemini/hooks/` by the bootstrap scripts.
-
-## Hook types (Claude Code)
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": ".*",
+      "hooks": [{ "type": "command", "command": "~/.claude/hooks/pre-tool-use.sh" }]
+    }]
+  }
+}
+```
 
 | Event | Trigger |
 |-------|---------|
@@ -30,48 +33,59 @@ These scripts are copied to `~/.claude/hooks/`, `~/.config/opencode/hooks/`, and
 | `Notification` | On agent notifications |
 | `Stop` | When agent completes |
 
-## Example: log all edits
+Scripts: `claude-code-pre-tool-use.sh/ps1` → copied to `~/.claude/hooks/pre-tool-use.sh/ps1`
 
-```json
-// In ~/.claude/settings.json
-"hooks": {
-  "PostToolUse": [
-    {
-      "matcher": "Edit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "echo \"Edited: $CLAUDE_TOOL_INPUT_PATH\" >> ~/edit-audit.log"
-        }
-      ]
+## OpenCode
+
+Uses JS/TS plugins, NOT shell scripts. Plugins export an async function returning event handlers:
+
+```javascript
+export const SecurityPlugin = async ({ $ }) => {
+  return {
+    "tool.execute.before": async (input, output) => {
+      // block secret file access
     }
-  ]
+  }
 }
 ```
 
-## Example: auto-format on edit
+| Event | Trigger |
+|-------|---------|
+| `tool.execute.before` | Before any tool call |
+| `tool.execute.after` | After any tool call |
+| `session.created` | New session started |
+| `session.idle` | Session becomes idle |
+| `permission.asked` | Permission requested |
+
+Plugin: `config/opencode/plugins/security.js` → copied to `~/.config/opencode/plugins/security.js`
+
+## Gemini CLI
+
+Shell scripts referenced from `~/.gemini/settings.json`:
 
 ```json
-"hooks": {
-  "PostToolUse": [
-    {
-      "matcher": "Edit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "prettier --write \"$CLAUDE_TOOL_INPUT_PATH\" 2>/dev/null || true"
-        }
-      ]
-    }
-  ]
+{
+  "hooks": {
+    "BeforeTool": [{
+      "matcher": "*",
+      "hooks": [{ "name": "security", "type": "command", "command": "bash ~/.gemini/hooks/pre-tool-use.sh" }]
+    }]
+  }
 }
 ```
 
-## Adding a hook
+| Event | Trigger |
+|-------|---------|
+| `SessionStart` | Session starts |
+| `BeforeAgent` | Before agent runs |
+| `BeforeToolSelection` | Before LLM selects tools |
+| `BeforeTool` | Before tool execution |
+| `AfterTool` | After tool execution |
+| `AfterModel` | After model response |
+| `AfterAgent` | After agent completes |
+| `SessionEnd` | Session ends |
 
-1. Add the hook script to `hooks/scripts/<name>.sh` or `hooks/scripts/<name>.ps1`
-2. Reference it from your tool's config
-3. Document it in `docs/hooks-catalog.md`
+Scripts: `gemini-pre-tool-use.sh/ps1` → copied to `~/.gemini/hooks/pre-tool-use.sh/ps1`
 
 ## Security note
 

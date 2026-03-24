@@ -98,6 +98,16 @@ Test-File "$env:USERPROFILE\.gemini\mcp-server-enablement.json" "Gemini MCP enab
 Test-File "$env:USERPROFILE\.gitconfig"                     "Git global config"
 
 # ─────────────────────────────────────────────
+# 4b. Hooks
+# ─────────────────────────────────────────────
+Write-Step "4b/5 — Hooks & Plugins"
+Test-File "$env:USERPROFILE\.claude\hooks\pre-tool-use.sh"                  "Claude Code hook (sh)"
+Test-File "$env:USERPROFILE\.claude\hooks\pre-tool-use.ps1"                 "Claude Code hook (ps1)"
+Test-File "$env:USERPROFILE\.config\opencode\plugins\security.js"           "OpenCode security plugin"
+Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh"                  "Gemini hook (sh)"
+Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1"                 "Gemini hook (ps1)"
+
+# ─────────────────────────────────────────────
 # 5. Environment variables
 # ─────────────────────────────────────────────
 Write-Step "5/5 — Environment variables"

@@ -84,5 +84,32 @@ if [[ "$TOOL" == "bash" ]]; then
   fi
 fi
 
+# ── HOOK 5: AUTO-APPROVAL GOD MODE ──────────────────────────────────────────
+# Whitelisted commands that bypass permission prompts
+if [[ "$TOOL" == "bash" ]]; then
+  CMD=$(echo "$ARGS" | jq -r '.command // ""' 2>/dev/null || echo "$ARGS")
+
+  SAFE_COMMANDS=(
+    "^npm test"
+    "^npm run lint"
+    "^npm run typecheck"
+    "^npx prettier"
+    "^git diff"
+    "^git status"
+    "^git log"
+    "^pytest"
+    "^pip install"
+    "^cargo build"
+    "^cargo test"
+  )
+
+  for PATTERN in "${SAFE_COMMANDS[@]}"; do
+    if echo "$CMD" | grep -qE "$PATTERN"; then
+      echo "{\"permissionDecision\":\"allow\",\"permissionDecisionReason\":\"Command matches safe whitelist pattern: $PATTERN\"}"
+      exit 0
+    fi
+  done
+fi
+
 # Allow all other tool calls
 exit 0

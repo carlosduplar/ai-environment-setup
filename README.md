@@ -148,6 +148,27 @@ config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI
 
 Shared hook scripts that run before tool calls to enforce security policies and safety checks.
 
+### Why Hooks Instead of Instructions in Markdown?
+
+You might wonder: why not just add security rules to `CLAUDE.md` or `AGENTS.md`? The answer is simple: **LLMs treat markdown files as suggestions, not requirements.**
+
+We learned this the hard way. Here's what happens:
+
+- You write "never touch .env files" in `CLAUDE.md`
+- The LLM reads it, nods politely, and 3 sessions later deletes your `.env` while "cleaning up the project"
+- You add it again in bigger letters: "DO NOT EDIT .env"
+- Next week: same problem, different session
+
+LLMs are helpful by default — they want to complete your task. When they see a file that looks "messy" or "out of place," they'll clean it. Your secrets are collateral damage.
+
+**Hooks solve this.** They execute *before* the tool runs, at the protocol level. The LLM cannot bypass them because:
+
+1. Hooks intercept the tool call before it executes
+2. Blocking returns a denial that the LLM must respect
+3. No amount of clever prompting can bypass a pre-tool-use guard
+
+Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks for anything that must never, ever happen (secret file access, destructive commands, etc.).
+
 ### Rule: Hook Design Principles
 
 1. **Fail closed** — deny by default, allow explicitly
@@ -163,10 +184,24 @@ Shared hook scripts that run before tool calls to enforce security policies and 
 | Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny |
 | OpenCode | `opencode-pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` |
 | Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny |
+| GitHub Copilot CLI | `.github/hooks/hooks.json` | Uses `.github/hooks/` directory in repo |
+
+### Shared Hook Scripts (all platforms)
+
+| Script | Purpose |
+|--------|---------|
+| `pre-tool-use.ps1/.sh` | Hook 2 (Secret blocking) + Hook 5 (Auto-approval) |
+| `post-tool-use.ps1/.sh` | Hook 1 (Auto-format) |
+| `notification.ps1/.sh` | Hook 3 (Desktop notifications) |
+| `post-compact.ps1/.sh` | Hook 4 (Context memory refresh) |
 
 ### What the Hooks Do
 
-- **Secret file protection** — Deny read/edit/create on `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
+- **Hook 1: Auto-Format Every File Edit** — Runs Prettier on every file edit/write automatically
+- **Hook 2: Secret file protection** — Deny read/edit/create on `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
+- **Hook 3: Desktop Notifications** — Native OS alerts when Claude needs your input
+- **Hook 4: Context Memory Refresh** — Re-reads critical files (CLAUDE.md, ARCHITECTURE.md) after context compaction
+- **Hook 5: Auto-Approval God Mode** — Whitelists safe commands (npm test, git diff, etc.) to skip permission prompts
 - **Compact safety check** — Block `/compact` when git working tree has uncommitted changes
 
 ### Hook Scope by Tool

@@ -7,6 +7,18 @@ INPUT=$(cat)
 TOOL=$(echo "$INPUT" | jq -r '.toolName // ""')
 RESULT_TYPE=$(echo "$INPUT" | jq -r '.toolResult.resultType // ""')
 
+# Hook 1: Auto-Format Every File Edit
+if [[ "$TOOL" =~ ^(Edit|Write)$ ]] && [[ "$RESULT_TYPE" == "success" ]]; then
+  FILE_PATH=$(echo "$INPUT" | jq -r '.toolResult.path // ""')
+  if [ -n "$FILE_PATH" ] && [ -f "$FILE_PATH" ]; then
+    EXT="${FILE_PATH##*.}"
+    FORMATTABLE_EXTS="js ts jsx tsx json css scss html vue yaml yml md"
+    if echo "$FORMATTABLE_EXTS" | grep -q "\b$EXT\b"; then
+      npx prettier --write "$FILE_PATH" 2>/dev/null || true
+    fi
+  fi
+fi
+
 # Only act on successful shell/bash executions
 if [[ "$TOOL" != "bash" ]] || [[ "$RESULT_TYPE" != "success" ]]; then
   exit 0

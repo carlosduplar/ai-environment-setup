@@ -3,6 +3,19 @@ $inputData = $input | Out-String | ConvertFrom-Json -ErrorAction SilentlyContinu
 $tool = $inputData.toolName
 $resultType = $inputData.toolResult.resultType
 
+# Hook 1: Auto-Format Every File Edit
+# Runs Prettier on every file edit/write
+if ($tool -match "^(Edit|Write)$" -and $resultType -eq "success") {
+    $filePath = $inputData.toolResult.path
+    if ($filePath -and (Test-Path $filePath)) {
+        $ext = [System.IO.Path]::GetExtension($filePath)
+        $formattableExts = @('.js', '.ts', '.jsx', '.tsx', '.json', '.css', '.scss', '.html', '.vue', '.yaml', '.yml', '.md')
+        if ($ext -in $formattableExts) {
+            prettier --write $filePath 2>$null
+        }
+    }
+}
+
 if ($tool -ne "bash" -or $resultType -ne "success") { exit 0 }
 
 $lastMsg = git log -1 --pretty=%s 2>$null

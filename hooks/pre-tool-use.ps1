@@ -40,20 +40,51 @@ if ($tool -in $fileTools) {
 
 # Compact safety check
 if ($tool -eq "bash") {
-    try {
-        $cmd = ($args_raw | ConvertFrom-Json -ErrorAction Stop).command
-    } catch { $cmd = $args_raw }
+	try {
+		$cmd = ($args_raw | ConvertFrom-Json -ErrorAction Stop).command
+	} catch { $cmd = $args_raw }
 
-    if ($cmd -match "compact") {
-        $gitStatus = git status --porcelain 2>$null
-        if ($gitStatus) {
-            @{
-                permissionDecision = "deny"
-                permissionDecisionReason = "Cannot compact with uncommitted changes. Commit or restore all changes first, then update PLAN.md status."
-            } | ConvertTo-Json -Compress
-            exit 0
-        }
-    }
+	if ($cmd -match "compact") {
+		$gitStatus = git status --porcelain 2>$null
+		if ($gitStatus) {
+			@{
+				permissionDecision = "deny"
+				permissionDecisionReason = "Cannot compact with uncommitted changes. Commit or restore all changes first, then update PLAN.md status."
+			} | ConvertTo-Json -Compress
+			exit 0
+		}
+	}
+}
+
+# Hook 5: Auto-Approval God Mode
+# Whitelisted commands that bypass permission prompts
+$safeCommands = @(
+	'^npm test',
+	'^npm run lint',
+	'^npm run typecheck',
+	'^npx prettier',
+	'^git diff',
+	'^git status',
+	'^git log',
+	'^pytest',
+	'^pip install',
+	'^cargo build',
+	'^cargo test'
+)
+if ($tool -eq "bash") {
+	try {
+		$cmd = ($args_raw | ConvertFrom-Json -ErrorAction Stop).command
+	} catch { $cmd = $args_raw }
+
+	foreach ($pattern in $safeCommands) {
+		if ($cmd -match $pattern) {
+			@{
+				permissionDecision = "allow"
+				permissionDecisionReason = "Command matches safe whitelist pattern: $pattern"
+			} | ConvertTo-Json -Compress
+			exit 0
+		}
+	}
 }
 
 exit 0

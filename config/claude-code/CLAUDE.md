@@ -11,9 +11,10 @@
 - Do not introduce new dependencies, tooling, or architecture unless asked.
 
 # Protected patterns (never read or edit)
-- `.env*`, `**/secrets/**`, `~/.ssh/**`
 - `.git/**`
 - `node_modules/**`
+
+Note: Secret files (`.env*`, `**/secrets/**`, `~/.ssh/**`) are enforced by hooks.
 
 # Generated files
 - Lockfiles (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`): do not edit by hand.
@@ -22,6 +23,3 @@
 ## OS and Shell
 - The environment is PowerShell 7 on Windows 11.
 - Use standard PowerShell commands and syntax for any shell interactions, file manipulations, or tool executions.
-
-# Plan Execution
-- When executing a long plan, you must commit after each finished task and compact the conversation to keep the context window manageable.

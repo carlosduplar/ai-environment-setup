@@ -11,9 +11,10 @@
 - Do not introduce new dependencies, tooling, or architecture unless asked.
 
 # Protected patterns (never read or edit)
-- `.env*`, `**/secrets/**`, `~/.ssh/**`
 - `.git/**`
 - `node_modules/**`
+
+Note: Secret files (`.env*`, `**/secrets/**`, `~/.ssh/**`) are enforced by hooks.
 
 # Generated files
 - Lockfiles (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`): do not edit by hand.
@@ -24,6 +25,3 @@
 - Use standard PowerShell commands and syntax for any shell interactions, file manipulations, or tool executions.
 - When using gws CLI in Windows PowerShell, passing complex JSON through --params or --json flags often fails due to
   shell escaping issues. Using Python's subprocess with shell=True and json.dumps is the most reliable workaround.
-
-# Plan Execution
-- When executing a long plan, you must commit after each finished task and compact the conversation to keep the context window manageable.

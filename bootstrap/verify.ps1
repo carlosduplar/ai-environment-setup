@@ -97,6 +97,8 @@ Test-File "$env:USERPROFILE\.config\opencode\opencode.json" "OpenCode config"
 Test-File "$env:USERPROFILE\.gemini\GEMINI.md"              "Gemini system prompt"
 Test-File "$env:USERPROFILE\.gemini\mcp-server-enablement.json" "Gemini MCP enablement"
 Test-File "$env:USERPROFILE\.gitconfig"                     "Git global config"
+Test-File "$env:USERPROFILE\.copilot\copilot-instructions.md" "Copilot instructions"
+Test-File "$env:USERPROFILE\.copilot\AGENTS.md"              "Copilot AGENTS config"
 
 # ─────────────────────────────────────────────
 # 4b. Hooks

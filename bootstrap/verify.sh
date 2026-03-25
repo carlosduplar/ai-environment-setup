@@ -49,6 +49,8 @@ check_file "$HOME/.config/opencode/opencode.json"      "OpenCode config"
 check_file "$HOME/.gemini/GEMINI.md"                   "Gemini system prompt"
 check_file "$HOME/.gemini/mcp-server-enablement.json"  "Gemini MCP enablement"
 check_file "$HOME/.gitconfig"                          "Git global config"
+check_file "$HOME/.copilot/copilot-instructions.md"    "Copilot instructions"
+check_file "$HOME/.copilot/AGENTS.md"                  "Copilot AGENTS config"
 
 # ─────────────────────────────────────────────
 # 4b. Hooks

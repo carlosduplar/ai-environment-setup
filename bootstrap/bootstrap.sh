@@ -173,6 +173,8 @@ declare -A CONFIGS=(
     ["$HOOKS/post-compact.ps1"]="$HOME_DIR/.claude/hooks/post-compact.ps1"
     ["$HOOKS/gemini-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
     ["$HOOKS/gemini-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
+    ["$CONFIG/github-copilot/copilot-instructions.md"]="$HOME_DIR/.copilot/copilot-instructions.md"
+    ["$CONFIG/github-copilot/AGENTS.md"]="$HOME_DIR/.copilot/AGENTS.md"
 )
 
 for src in "${!CONFIGS[@]}"; do

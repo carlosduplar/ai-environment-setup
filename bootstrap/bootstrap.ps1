@@ -218,7 +218,9 @@ $configs = @(
     @{ src = "$hooksDir\post-compact.sh";                    dst = "$env:USERPROFILE\.claude\hooks\post-compact.sh" },
     @{ src = "$hooksDir\post-compact.ps1";                   dst = "$env:USERPROFILE\.claude\hooks\post-compact.ps1" },
     @{ src = "$hooksDir\gemini-pre-tool-use.sh";             dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
-    @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
+    @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" },
+    @{ src = "$configDir\github-copilot\copilot-instructions.md"; dst = "$env:USERPROFILE\.copilot\copilot-instructions.md" },
+    @{ src = "$configDir\github-copilot\AGENTS.md";              dst = "$env:USERPROFILE\.copilot\AGENTS.md" }
 )
 
 foreach ($cfg in $configs) {

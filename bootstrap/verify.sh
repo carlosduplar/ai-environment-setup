@@ -19,55 +19,88 @@ source "$SCRIPT_DIR/lib/utils.sh"
 # 1. Core tools
 # ─────────────────────────────────────────────
 step "1/5 — Core tools"
-for tool in git node npm pwsh bash jq curl gh; do
+for tool in git node npm pwsh bash jq curl; do
     check_tool "$tool"
 done
 
 # ─────────────────────────────────────────────
-# 2. AI tools
+# 2. AI agents (optional)
 # ─────────────────────────────────────────────
-step "2/5 — AI tools"
-for tool in claude opencode gemini uv python; do
-    check_tool "$tool"
+step "2/5 — AI agents"
+
+has_claude=false
+has_opencode=false
+has_gemini=false
+has_copilot=false
+
+for pair in "claude:has_claude" "opencode:has_opencode" "gemini:has_gemini" "gh-copilot:has_copilot"; do
+    cmd="${pair%%:*}"
+    var="${pair##*:}"
+    if command -v "$cmd" &>/dev/null; then
+        ok "$cmd found"
+        declare "$var=true"
+    else
+        warn "$cmd not found (optional)"
+    fi
 done
 
 # ─────────────────────────────────────────────
-# 3. Additional CLIs
+# 3. Optional tools
 # ─────────────────────────────────────────────
-step "3/5 — Additional CLIs"
-for tool in playwright ctx7 firebase gcloud gws markitdown npx uvx; do
-    check_tool "$tool"
+step "3/5 — Optional tools"
+for tool in python ctx7 playwright npx gcloud firebase gws markitdown; do
+    if command -v "$tool" &>/dev/null; then
+        ok "$tool found"
+    else
+        info "$tool not found (optional)"
+    fi
 done
 
 # ─────────────────────────────────────────────
-# 4. Config files
+# 4. Config & hooks (agent-gated)
 # ─────────────────────────────────────────────
-step "4/5 — Config files"
-check_file "$HOME/.claude/settings.json"               "Claude Code settings"
-check_file "$HOME/.claude/CLAUDE.md"                   "Claude Code system prompt"
-check_file "$HOME/.config/opencode/opencode.json"      "OpenCode config"
-check_file "$HOME/.gemini/GEMINI.md"                   "Gemini system prompt"
-check_file "$HOME/.gemini/mcp-server-enablement.json"  "Gemini MCP enablement"
-check_file "$HOME/.gitconfig"                          "Git global config"
-check_file "$HOME/.copilot/copilot-instructions.md"    "Copilot instructions"
-check_file "$HOME/.copilot/AGENTS.md"                  "Copilot AGENTS config"
+step "4/5 — Config & hooks"
 
-# ─────────────────────────────────────────────
-# 4b. Hooks
-# ─────────────────────────────────────────────
-step "4b/5 — Hooks & Plugins"
-check_file "$HOME/.claude/hooks/pre-tool-use.sh"         "Claude Code hook (sh)"
-check_file "$HOME/.claude/hooks/pre-tool-use.ps1"        "Claude Code hook (ps1)"
-check_file "$HOME/.claude/hooks/post-tool-use.sh"        "Claude Code post-tool-use hook (sh)"
-check_file "$HOME/.claude/hooks/post-tool-use.ps1"       "Claude Code post-tool-use hook (ps1)"
-check_file "$HOME/.claude/hooks/notification.sh"         "Claude Code notification hook (sh)"
-check_file "$HOME/.claude/hooks/notification.ps1"        "Claude Code notification hook (ps1)"
-check_file "$HOME/.claude/hooks/post-compact.sh"         "Claude Code post-compact hook (sh)"
-check_file "$HOME/.claude/hooks/post-compact.ps1"        "Claude Code post-compact hook (ps1)"
-check_file "$HOME/.config/opencode/plugins/security.js"  "OpenCode security plugin"
-check_file "$HOME/.gemini/hooks/pre-tool-use.sh"         "Gemini hook (sh)"
-check_file "$HOME/.gemini/hooks/pre-tool-use.ps1"        "Gemini hook (ps1)"
-check_file "$ROOT/.github/hooks/hooks.json"              "Copilot repo hook config"
+if [[ "$has_claude" == "true" ]]; then
+    check_file "$HOME/.claude/settings.json"              "Claude Code settings"
+    check_file "$HOME/.claude/CLAUDE.md"                  "Claude Code system prompt"
+    check_file "$HOME/.claude/hooks/pre-tool-use.sh"      "Claude Code hook (sh)"
+    check_file "$HOME/.claude/hooks/pre-tool-use.ps1"     "Claude Code hook (ps1)"
+    check_file "$HOME/.claude/hooks/post-tool-use.sh"     "Claude post-tool-use hook (sh)"
+    check_file "$HOME/.claude/hooks/post-tool-use.ps1"    "Claude post-tool-use hook (ps1)"
+    check_file "$HOME/.claude/hooks/notification.sh"      "Claude notification hook (sh)"
+    check_file "$HOME/.claude/hooks/notification.ps1"     "Claude notification hook (ps1)"
+    check_file "$HOME/.claude/hooks/post-compact.sh"      "Claude post-compact hook (sh)"
+    check_file "$HOME/.claude/hooks/post-compact.ps1"     "Claude post-compact hook (ps1)"
+else
+    info "Claude not installed — skipping its config/hook checks"
+fi
+
+if [[ "$has_opencode" == "true" ]]; then
+    check_file "$HOME/.config/opencode/opencode.json"       "OpenCode config"
+    check_file "$HOME/.config/opencode/plugins/security.js" "OpenCode security plugin"
+else
+    info "OpenCode not installed — skipping its config checks"
+fi
+
+if [[ "$has_gemini" == "true" ]]; then
+    check_file "$HOME/.gemini/GEMINI.md"                   "Gemini system prompt"
+    check_file "$HOME/.gemini/mcp-server-enablement.json"  "Gemini MCP enablement"
+    check_file "$HOME/.gemini/hooks/pre-tool-use.sh"       "Gemini hook (sh)"
+    check_file "$HOME/.gemini/hooks/pre-tool-use.ps1"      "Gemini hook (ps1)"
+else
+    info "Gemini not installed — skipping its config/hook checks"
+fi
+
+if [[ "$has_copilot" == "true" ]]; then
+    check_file "$HOME/.copilot/copilot-instructions.md"    "Copilot instructions"
+    check_file "$HOME/.copilot/AGENTS.md"                  "Copilot AGENTS config"
+else
+    info "Copilot not installed — skipping its config checks"
+fi
+
+# Always check repo-level Copilot hook config
+check_file "$ROOT/.github/hooks/hooks.json" "Copilot repo hook config"
 
 # ─────────────────────────────────────────────
 # 5. Environment variables
@@ -76,7 +109,7 @@ step "5/5 — Environment variables"
 for v in ANTHROPIC_AUTH_TOKEN BRIGHTDATA_API_KEY GITHUB_TOKEN; do
     check_env "$v"
 done
-for v in NVIDIA_API_KEY OPENROUTER_API_KEY MISTRAL_API_KEY GOOGLE_CLOUD_PROJECT FIREBASE_TOKEN; do
+for v in NVIDIA_API_KEY OPENROUTER_API_KEY MISTRAL_API_KEY; do
     [[ -n "${!v:-}" ]] && ok "$v set" || info "$v not set (optional)"
 done
 

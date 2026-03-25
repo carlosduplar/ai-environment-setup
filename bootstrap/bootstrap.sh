@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # bootstrap.sh — Install the full AI coding environment (Git Bash on Windows 11)
-# Usage: bash bootstrap/bootstrap.sh [--update] [--dry-run]
+# Usage: bash bootstrap/bootstrap.sh [--update] [--dry-run] [--gws] [--firebase]
 
 set -euo pipefail
 
@@ -12,11 +12,15 @@ HOOKS="$ROOT/hooks"
 
 UPDATE=false
 DRY_RUN=false
+FLAG_GWS=false
+FLAG_FIREBASE=false
 
 for arg in "$@"; do
     case $arg in
-        --update)  UPDATE=true ;;
-        --dry-run) DRY_RUN=true ;;
+        --update)    UPDATE=true ;;
+        --dry-run)   DRY_RUN=true ;;
+        --gws)       FLAG_GWS=true ;;
+        --firebase)  FLAG_FIREBASE=true ;;
     esac
 done
 
@@ -27,16 +31,37 @@ source "$SCRIPT_DIR/lib/utils.sh"
 # 0. Pre-flight
 # ─────────────────────────────────────────────
 step "Pre-flight checks"
-assert_command "node"   "Install Node.js: https://nodejs.org"
-assert_command "npm"    "Install Node.js: https://nodejs.org"
-assert_command "python" "Install Python: https://python.org"
-assert_command "git"    "Install Git: https://git-scm.com"
+assert_command "node" "Install Node.js: https://nodejs.org"
+assert_command "npm"  "Install Node.js: https://nodejs.org"
+assert_command "git"  "Install Git: https://git-scm.com"
 load_env_file
 
 # ─────────────────────────────────────────────
-# 1. npm global packages
+# 1. Core CLIs via winget (install if missing)
 # ─────────────────────────────────────────────
-step "1/7 — npm global packages"
+step "1/7 — Core CLIs (winget)"
+
+# Install python if not present
+if ! command -v python &>/dev/null; then
+    info "python not found, installing via winget..."
+    run winget install Python.Python.3 --accept-package-agreements --accept-source-agreements --silent
+else
+    ok "python already installed"
+fi
+
+# Ensure jq via winget
+if ! command -v jq &>/dev/null; then
+    info "jq not found, installing via winget..."
+    run winget install jqlang.jq --accept-package-agreements --accept-source-agreements --silent
+else
+    ok "jq already installed"
+fi
+
+# ─────────────────────────────────────────────
+# 2. npm global packages
+# ─────────────────────────────────────────────
+step "2/7 — npm global packages"
+
 while IFS= read -r pkg_name pkg_version; do
     [[ "$pkg_name" == "#"* || -z "$pkg_name" ]] && continue
     if npm list -g --depth=0 2>/dev/null | grep -q "$pkg_name" && [[ "$UPDATE" == "false" ]]; then
@@ -46,31 +71,36 @@ while IFS= read -r pkg_name pkg_version; do
         run npm install -g "$pkg_name@$pkg_version"
     fi
 done < <(python -c "
-import json, sys
+import json
 data = json.load(open('$MANIFESTS/npm-global.json'))
 for p in data['packages']:
     print(p['name'], p.get('version', 'latest'))
 ")
 
-# ─────────────────────────────────────────────
-# 1.5. Ensure jq
-# ─────────────────────────────────────────────
-step "2/7 — Ensure jq"
-if ! command -v jq &>/dev/null; then
-    info "jq not found, installing via Chocolatey..."
-    if command -v choco &>/dev/null; then
-        run choco install jq -y
-    elif command -v winget &>/dev/null; then
-        run winget install jqlang.jq
+# ── Optional: Firebase ──────────────────────────────
+if [[ "$FLAG_FIREBASE" == "true" ]]; then
+    step "Optional — Firebase CLI"
+    if npm list -g firebase-tools &>/dev/null && [[ "$UPDATE" == "false" ]]; then
+        ok "firebase-tools already installed"
     else
-        warn "Neither Chocolatey nor WinGet found. Please install jq manually."
+        info "Installing firebase-tools..."
+        run npm install -g firebase-tools
     fi
-else
-    ok "jq already installed"
+fi
+
+# ── Optional: Google Workspace ──────────────────────
+if [[ "$FLAG_GWS" == "true" ]]; then
+    step "Optional — Google Workspace CLI"
+    if npm list -g @googleworkspace/cli &>/dev/null && [[ "$UPDATE" == "false" ]]; then
+        ok "@googleworkspace/cli already installed"
+    else
+        info "Installing @googleworkspace/cli..."
+        run npm install -g "@googleworkspace/cli"
+    fi
 fi
 
 # ─────────────────────────────────────────────
-# 2. Install agent skills
+# 3. Install agent skills
 # ─────────────────────────────────────────────
 step "3/7 — Install agent skills"
 install_local_skill() {
@@ -86,96 +116,131 @@ install_local_skill() {
     run npx skills add "$source" --skill "$skill"
 }
 
-install_local_skill "brand-guidelines"
-install_local_skill "canvas-design"
-install_local_skill "context7-cli"
-install_local_skill "doc-coauthoring"
-install_local_skill "docx"
-install_local_skill "find-docs"
-install_local_skill "find-skills"
-install_local_skill "frontend-design"
-install_local_skill "gh-cli"
-install_local_skill "gws-calendar"
-install_local_skill "gws-docs"
-install_local_skill "gws-drive"
-install_local_skill "gws-gmail"
-install_local_skill "gws-keep"
-install_local_skill "gws-shared"
-install_local_skill "gws-sheets"
-install_local_skill "gws-tasks"
-install_local_skill "gws-workflow-email-to-task"
-install_local_skill "gws-workflow-meeting-prep"
-install_local_skill "gws-workflow-standup-report"
-install_local_skill "gws-workflow-weekly-digest"
-install_local_skill "mcp-builder"
-install_local_skill "pdf"
-install_local_skill "playwright-cli"
-install_local_skill "pptx"
-install_local_skill "seo-audit"
-install_local_skill "skill-creator"
-install_local_skill "vercel-react-best-practices"
-install_local_skill "vercel-react-native-skills"
-install_local_skill "web-artifacts-builder"
-install_local_skill "web-design-guidelines"
-install_local_skill "webapp-testing"
-install_local_skill "xlsx"
+# Core skills (always installed)
+CORE_SKILLS=(
+    brand-guidelines
+    canvas-design
+    context7-cli
+    doc-coauthoring
+    docx
+    find-docs
+    find-skills
+    frontend-design
+    gh-cli
+    mcp-builder
+    pdf
+    playwright-cli
+    pptx
+    seo-audit
+    skill-creator
+    vercel-react-best-practices
+    vercel-react-native-skills
+    web-artifacts-builder
+    web-design-guidelines
+    webapp-testing
+    xlsx
+)
 
-# ─────────────────────────────────────────────
-# 3. Python tools via uv
-# ─────────────────────────────────────────────
-step "4/7 — Python tools (uv)"
-assert_command "uv" "Install uv: https://docs.astral.sh/uv/getting-started/installation/"
+# GWS skills (only with --gws)
+GWS_SKILLS=(
+    gws-calendar
+    gws-docs
+    gws-drive
+    gws-gmail
+    gws-keep
+    gws-shared
+    gws-sheets
+    gws-tasks
+    gws-workflow-email-to-task
+    gws-workflow-meeting-prep
+    gws-workflow-standup-report
+    gws-workflow-weekly-digest
+)
 
-while IFS= read -r pkg; do
-    [[ "$pkg" == "#"* || -z "$pkg" ]] && continue
-    info "Ensuring $pkg..."
-    run uv tool install "$pkg"
-done < "$MANIFESTS/pip-packages.txt"
+for skill in "${CORE_SKILLS[@]}"; do
+    install_local_skill "$skill"
+done
 
-# ─────────────────────────────────────────────
-# 4. GitHub Copilot CLI
-# ─────────────────────────────────────────────
-step "5/7 — GitHub Copilot CLI"
-assert_command "gh" "Install gh: https://cli.github.com"
-# Install Copilot CLI via npm (recommended) or curl
-if command -v npm &>/dev/null; then
-    if npm list -g @github/copilot &>/dev/null; then
-        ok "GitHub Copilot CLI already installed via npm"
-    else
-        info "Installing GitHub Copilot CLI via npm..."
-        run npm install -g @github/copilot
-    fi
-else
-    warn "npm not found, trying curl installation..."
-    run curl -fsSL https://gh.io/copilot-install | bash
+if [[ "$FLAG_GWS" == "true" ]]; then
+    for skill in "${GWS_SKILLS[@]}"; do
+        install_local_skill "$skill"
+    done
 fi
 
 # ─────────────────────────────────────────────
-# 5. Config scaffolding
+# 4. Python packages (pip)
+# ─────────────────────────────────────────────
+step "4/7 — Python packages"
+if ! command -v python &>/dev/null; then
+    warn "python not found. Skipping pip packages (markitdown will be unavailable)."
+else
+    while IFS= read -r pkg; do
+        [[ "$pkg" == "#"* || -z "$pkg" ]] && continue
+        info "Ensuring $pkg..."
+        run python -m pip install --user "$pkg"
+    done < "$MANIFESTS/pip-packages.txt"
+fi
+
+# ─────────────────────────────────────────────
+# 5. Detect agents
+# ─────────────────────────────────────────────
+step "5/7 — Detect agents"
+
+declare -A AGENTS
+
+for pair in "claude:claude" "opencode:opencode" "gemini:gemini" "copilot:gh-copilot"; do
+    name="${pair%%:*}"
+    cmd="${pair##*:}"
+    if command -v "$cmd" &>/dev/null; then
+        ok "$name found"
+        AGENTS[$name]=true
+    else
+        warn "$name not found — skipping its config/hooks"
+        AGENTS[$name]=false
+    fi
+done
+
+# ─────────────────────────────────────────────
+# 6. Config scaffolding (agent-gated)
 # ─────────────────────────────────────────────
 step "6/7 — Config scaffolding"
 HOME_DIR="$HOME"
 
-declare -A CONFIGS=(
-    ["$CONFIG/claude-code/settings.json.example"]="$HOME_DIR/.claude/settings.json"
-    ["$CONFIG/claude-code/CLAUDE.md"]="$HOME_DIR/.claude/CLAUDE.md"
-    ["$CONFIG/opencode/opencode.json.example"]="$HOME_DIR/.config/opencode/opencode.json"
-    ["$CONFIG/gemini/GEMINI.md"]="$HOME_DIR/.gemini/GEMINI.md"
-    ["$CONFIG/gemini/mcp-server-enablement.json"]="$HOME_DIR/.gemini/mcp-server-enablement.json"
-    ["$CONFIG/opencode/plugins/security.js"]="$HOME_DIR/.config/opencode/plugins/security.js"
-    ["$HOOKS/claude-code-pre-tool-use.sh"]="$HOME_DIR/.claude/hooks/pre-tool-use.sh"
-    ["$HOOKS/claude-code-pre-tool-use.ps1"]="$HOME_DIR/.claude/hooks/pre-tool-use.ps1"
-    ["$HOOKS/post-tool-use.sh"]="$HOME_DIR/.claude/hooks/post-tool-use.sh"
-    ["$HOOKS/post-tool-use.ps1"]="$HOME_DIR/.claude/hooks/post-tool-use.ps1"
-    ["$HOOKS/notification.sh"]="$HOME_DIR/.claude/hooks/notification.sh"
-    ["$HOOKS/notification.ps1"]="$HOME_DIR/.claude/hooks/notification.ps1"
-    ["$HOOKS/post-compact.sh"]="$HOME_DIR/.claude/hooks/post-compact.sh"
-    ["$HOOKS/post-compact.ps1"]="$HOME_DIR/.claude/hooks/post-compact.ps1"
-    ["$HOOKS/gemini-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
-    ["$HOOKS/gemini-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
-    ["$CONFIG/github-copilot/copilot-instructions.md"]="$HOME_DIR/.copilot/copilot-instructions.md"
-    ["$CONFIG/github-copilot/AGENTS.md"]="$HOME_DIR/.copilot/AGENTS.md"
-)
+declare -A CONFIGS
+
+# Claude Code config + hooks
+if [[ "${AGENTS[claude]}" == "true" ]]; then
+    CONFIGS["$CONFIG/claude-code/settings.json.example"]="$HOME_DIR/.claude/settings.json"
+    CONFIGS["$CONFIG/claude-code/CLAUDE.md"]="$HOME_DIR/.claude/CLAUDE.md"
+    CONFIGS["$HOOKS/claude-code-pre-tool-use.sh"]="$HOME_DIR/.claude/hooks/pre-tool-use.sh"
+    CONFIGS["$HOOKS/claude-code-pre-tool-use.ps1"]="$HOME_DIR/.claude/hooks/pre-tool-use.ps1"
+    CONFIGS["$HOOKS/post-tool-use.sh"]="$HOME_DIR/.claude/hooks/post-tool-use.sh"
+    CONFIGS["$HOOKS/post-tool-use.ps1"]="$HOME_DIR/.claude/hooks/post-tool-use.ps1"
+    CONFIGS["$HOOKS/notification.sh"]="$HOME_DIR/.claude/hooks/notification.sh"
+    CONFIGS["$HOOKS/notification.ps1"]="$HOME_DIR/.claude/hooks/notification.ps1"
+    CONFIGS["$HOOKS/post-compact.sh"]="$HOME_DIR/.claude/hooks/post-compact.sh"
+    CONFIGS["$HOOKS/post-compact.ps1"]="$HOME_DIR/.claude/hooks/post-compact.ps1"
+fi
+
+# OpenCode config + plugin
+if [[ "${AGENTS[opencode]}" == "true" ]]; then
+    CONFIGS["$CONFIG/opencode/opencode.json.example"]="$HOME_DIR/.config/opencode/opencode.json"
+    CONFIGS["$CONFIG/opencode/plugins/security.js"]="$HOME_DIR/.config/opencode/plugins/security.js"
+fi
+
+# Gemini config + hooks
+if [[ "${AGENTS[gemini]}" == "true" ]]; then
+    CONFIGS["$CONFIG/gemini/GEMINI.md"]="$HOME_DIR/.gemini/GEMINI.md"
+    CONFIGS["$CONFIG/gemini/mcp-server-enablement.json"]="$HOME_DIR/.gemini/mcp-server-enablement.json"
+    CONFIGS["$HOOKS/gemini-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
+    CONFIGS["$HOOKS/gemini-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
+fi
+
+# Copilot config
+if [[ "${AGENTS[copilot]}" == "true" ]]; then
+    CONFIGS["$CONFIG/github-copilot/copilot-instructions.md"]="$HOME_DIR/.copilot/copilot-instructions.md"
+    CONFIGS["$CONFIG/github-copilot/AGENTS.md"]="$HOME_DIR/.copilot/AGENTS.md"
+fi
 
 for src in "${!CONFIGS[@]}"; do
     dst="${CONFIGS[$src]}"
@@ -194,30 +259,12 @@ for src in "${!CONFIGS[@]}"; do
 done
 
 # ─────────────────────────────────────────────
-# 5. Claude Code
-# ─────────────────────────────────────────────
-step "7/7 — Claude Code"
-if command -v claude &>/dev/null; then
-    ok "claude already installed"
-else
-    info "Installing Claude Code..."
-    # Use native bash installer (requires curl)
-    if command -v curl &>/dev/null; then
-        run curl -fsSL https://claude.ai/install.sh | bash
-        # Verify installation
-        if command -v claude &>/dev/null; then
-            ok "Claude Code installed successfully"
-        else
-            warn "Claude Code installation may have failed. Install manually from https://code.claude.com/docs/en/setup"
-        fi
-    else
-        warn "curl not found. Install Claude Code manually from https://code.claude.com/docs/en/setup"
-    fi
-fi
-
-# ─────────────────────────────────────────────
 # Done
 # ─────────────────────────────────────────────
 echo ""
 echo "Bootstrap complete."
+echo "Agents configured: $(for name in "${!AGENTS[@]}"; do [[ "${AGENTS[$name]}" == "true" ]] && echo -n "$name "; done)"
+for name in "${!AGENTS[@]}"; do
+    [[ "${AGENTS[$name]}" == "false" ]] && echo "Agents skipped:   $name"
+done
 echo "Next: fill .env.local, then run: bash bootstrap/verify.sh"

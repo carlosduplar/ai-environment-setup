@@ -1,5 +1,4 @@
-# pip-packages.txt — Python tools installed via 'uv tool install'
+# pip-packages.txt — Python tools installed via 'pip install'
 # Format: one package per line, comments start with #
 
-playwright
 markitdown

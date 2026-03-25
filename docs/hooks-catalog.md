@@ -68,26 +68,36 @@ Create `.github/hooks/hooks.json` in each repository (must be on default branch)
     "preToolUse": [
       {
         "type": "command",
-        "bash": "hooks/pre-tool-use.sh",
-        "powershell": "hooks/pre-tool-use.ps1"
+        "bash": "../../hooks/pre-tool-use.sh",
+        "powershell": "../../hooks/pre-tool-use.ps1"
       }
     ],
     "postToolUse": [
       {
         "type": "command",
-        "bash": "hooks/post-tool-use.sh",
-        "powershell": "hooks/post-tool-use.ps1"
+        "bash": "../../hooks/post-tool-use.sh",
+        "powershell": "../../hooks/post-tool-use.ps1"
       }
     ]
   }
 }
 ```
 
-The hooks are stored relative to the repository root. Copy hook scripts to the repo's `hooks/` folder.
+Paths in `.github/hooks/hooks.json` are resolved from `.github/hooks/`. In this repository, hooks live in `hooks/`, so we use `../../hooks/*`.
+
+## OpenCode Configuration
+
+OpenCode uses JS plugins instead of shell hook scripts. Copy the security plugin to:
+
+```text
+~/.config/opencode/plugins/security.js
+```
+
+The plugin listens to `tool.execute.before` and blocks secret-file access and unsafe compact calls.
 
 ## Currently configured hooks
 
-No hooks are configured by default. Add hooks to `~/.claude/settings.json` → `hooks` key.
+Hooks only run when referenced in each tool's settings (for Claude Code, `~/.claude/settings.json` → `hooks`).
 
 ## Example hooks
 
@@ -245,12 +255,14 @@ Pre-tool use hook on bash that checks commands against a whitelist. If matches (
 | `GEMINI_TOOL_INPUT_PATH` | Path argument for file tools |
 | `GEMINI_TOOL_INPUT_COMMAND` | Command string for Bash |
 
-## Pre‑built hook scripts
+## Pre-built hook assets
 
-The repository includes ready‑to‑use hook scripts for secret‑file protection and compact safety:
+The repository includes ready-to-use hook assets:
 
-- `claude-code-pre-tool-use.sh` / `.ps1` – for Claude Code (uses environment variables)
-- `opencode-pre-tool-use.sh` / `.ps1` – for OpenCode (expects JSON input)
-- `gemini-pre-tool-use.sh` / `.ps1` – for Gemini CLI (uses environment variables)
+- `claude-code-pre-tool-use.sh` / `.ps1` – Claude Code pre-tool guard
+- `post-tool-use.sh` / `.ps1`, `notification.sh` / `.ps1`, `post-compact.sh` / `.ps1` – Claude Code lifecycle hooks
+- `gemini-pre-tool-use.sh` / `.ps1` – Gemini CLI pre-tool guard
+- `pre-tool-use.sh` / `.ps1`, `post-tool-use.sh` / `.ps1`, `session-start.sh` / `.ps1`, `session-end.sh` / `.ps1` – Copilot CLI repo hooks
+- `config/opencode/plugins/security.js` – OpenCode plugin hook
 
-These are copied to `~/.claude/hooks/`, `~/.config/opencode/hooks/`, and `~/.gemini/hooks/` by the bootstrap scripts. See `hooks/README.md` for details.
+Bootstrap copies these to user hook/plugin directories (Claude, Gemini, OpenCode). Copilot hooks stay repo-scoped in `.github/hooks/hooks.json`.

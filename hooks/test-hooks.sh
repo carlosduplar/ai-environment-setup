@@ -23,18 +23,19 @@ done
 new_test_repo() {
   local tmp
   tmp=$(mktemp -d "copilot-test-XXXXXX")
-  cd "$tmp" || exit 1
-  git init -q
-  git config user.email "test@test.com"
-  git config user.name "Test"
-  echo "# test" > README.md
-  git add . 2>/dev/null
-  git commit -q -m "initial" 2>/dev/null
-  cat > AGENTS.md <<EOF
+  (
+    cd "$tmp" || exit 1
+    git init -q
+    git config user.email "test@test.com"
+    git config user.name "Test"
+    echo "# test" > README.md
+    git add . 2>/dev/null
+    git commit -q -m "initial" 2>/dev/null
+    cat > AGENTS.md <<EOF
 # AGENTS.md
 ## Test placeholder
 EOF
-  cat > PLAN.md <<EOF
+    cat > PLAN.md <<EOF
 # PLAN.md
 
 ## Test runner
@@ -51,15 +52,16 @@ After Milestone 1
 
 **Depends on:** none
 EOF
-  git add . 2>/dev/null
-  git commit -q -m "add plan" 2>/dev/null
+    git add . 2>/dev/null
+    git commit -q -m "add plan" 2>/dev/null
+  )
   echo "$tmp"
 }
 
 # Run a .sh hook with a given JSON payload
 run_hook_sh() {
-  local script=$1 payload=$2
-  echo "$payload" | bash "$script" 2>/dev/null
+  local script=$1 payload=$2 cwd=$3
+  (cd "$cwd" && echo "$payload" | bash "$script" 2>/dev/null)
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -78,21 +80,21 @@ else
   }
 
   # Should DENY
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"/project/.env"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"/project/.env"}')" "$REPO")
   if echo "$OUT" | jq -e '.permissionDecision == "deny"' >/dev/null 2>&1; then
     pass ".env file read is denied"
   else
     fail ".env file read is denied"
   fi
 
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "view" '{"path":".env.production"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "view" '{"path":".env.production"}')" "$REPO")
   if echo "$OUT" | jq -e '.permissionDecision == "deny"' >/dev/null 2>&1; then
     pass ".env.production view is denied"
   else
     fail ".env.production view is denied"
   fi
 
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"/app/secrets/db.json"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"/app/secrets/db.json"}')" "$REPO")
   if echo "$OUT" | jq -e '.permissionDecision == "deny"' >/dev/null 2>&1; then
     pass "/secrets/ path read is denied"
   else
@@ -100,14 +102,14 @@ else
   fi
 
   # Should ALLOW
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"src/main.ts"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "read" '{"path":"src/main.ts"}')" "$REPO")
   if [ -z "$OUT" ] || echo "$OUT" | jq -e '.permissionDecision != "deny"' >/dev/null 2>&1; then
     pass "src/main.ts read is allowed"
   else
     fail "src/main.ts read is allowed"
   fi
 
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "view" '{"path":"package.json"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "view" '{"path":"package.json"}')" "$REPO")
   if [ -z "$OUT" ] || echo "$OUT" | jq -e '.permissionDecision != "deny"' >/dev/null 2>&1; then
     pass "package.json view is allowed"
   else
@@ -116,7 +118,7 @@ else
 
   # Compact safety
   echo "dirty" > "$REPO/dirty.txt"
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"/compact"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"/compact"}')" "$REPO")
   if echo "$OUT" | jq -e '.permissionDecision == "deny"' >/dev/null 2>&1; then
     pass "compact denied on dirty tree"
   else
@@ -124,7 +126,7 @@ else
   fi
 
   rm "$REPO/dirty.txt"
-  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"/compact"}')")
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"/compact"}')" "$REPO")
   if [ -z "$OUT" ] || echo "$OUT" | jq -e '.permissionDecision != "deny"' >/dev/null 2>&1; then
     pass "compact allowed on clean tree"
   else

@@ -16,6 +16,7 @@ $ErrorActionPreference = "Continue"
 $pass = 0
 $fail = 0
 $warn = 0
+$root = Split-Path $PSScriptRoot -Parent
 
 function Test-Tool {
     param([string]$Name, [string]$VersionArg = "--version", [string]$MinVersion = "")
@@ -103,9 +104,16 @@ Test-File "$env:USERPROFILE\.gitconfig"                     "Git global config"
 Write-Step "4b/5 — Hooks & Plugins"
 Test-File "$env:USERPROFILE\.claude\hooks\pre-tool-use.sh"                  "Claude Code hook (sh)"
 Test-File "$env:USERPROFILE\.claude\hooks\pre-tool-use.ps1"                 "Claude Code hook (ps1)"
+Test-File "$env:USERPROFILE\.claude\hooks\post-tool-use.sh"                 "Claude Code post-tool-use hook (sh)"
+Test-File "$env:USERPROFILE\.claude\hooks\post-tool-use.ps1"                "Claude Code post-tool-use hook (ps1)"
+Test-File "$env:USERPROFILE\.claude\hooks\notification.sh"                  "Claude Code notification hook (sh)"
+Test-File "$env:USERPROFILE\.claude\hooks\notification.ps1"                 "Claude Code notification hook (ps1)"
+Test-File "$env:USERPROFILE\.claude\hooks\post-compact.sh"                  "Claude Code post-compact hook (sh)"
+Test-File "$env:USERPROFILE\.claude\hooks\post-compact.ps1"                 "Claude Code post-compact hook (ps1)"
 Test-File "$env:USERPROFILE\.config\opencode\plugins\security.js"           "OpenCode security plugin"
 Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh"                  "Gemini hook (sh)"
 Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1"                 "Gemini hook (ps1)"
+Test-File "$root\.github\hooks\hooks.json"                                  "Copilot repo hook config"
 
 # ─────────────────────────────────────────────
 # 5. Environment variables
@@ -113,7 +121,7 @@ Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1"                 "Gem
 Write-Step "5/5 — Environment variables"
 $requiredEnvVars = @(
     "ANTHROPIC_AUTH_TOKEN",
-    "BRIGHT_DATA_API_TOKEN",
+    "BRIGHTDATA_API_KEY",
     "GITHUB_TOKEN"
 )
 $optionalEnvVars = @(
@@ -145,7 +153,6 @@ if ($Security) {
         '"password"\s*:\s*"[^"]+"',     # Passwords in JSON
         'token\s*=\s*[a-zA-Z0-9_-]{20,}' # Generic tokens
     )
-    $root = Split-Path $PSScriptRoot -Parent
     foreach ($pattern in $patterns) {
         $hits = Get-ChildItem $root -Recurse -File -ErrorAction SilentlyContinue |
             Where-Object { $_.Extension -notmatch '\.(png|jpg|gif|ico|zip|lock)$' } |

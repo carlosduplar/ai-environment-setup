@@ -51,10 +51,27 @@ check_file "$HOME/.gemini/mcp-server-enablement.json"  "Gemini MCP enablement"
 check_file "$HOME/.gitconfig"                          "Git global config"
 
 # ─────────────────────────────────────────────
+# 4b. Hooks
+# ─────────────────────────────────────────────
+step "4b/5 — Hooks & Plugins"
+check_file "$HOME/.claude/hooks/pre-tool-use.sh"         "Claude Code hook (sh)"
+check_file "$HOME/.claude/hooks/pre-tool-use.ps1"        "Claude Code hook (ps1)"
+check_file "$HOME/.claude/hooks/post-tool-use.sh"        "Claude Code post-tool-use hook (sh)"
+check_file "$HOME/.claude/hooks/post-tool-use.ps1"       "Claude Code post-tool-use hook (ps1)"
+check_file "$HOME/.claude/hooks/notification.sh"         "Claude Code notification hook (sh)"
+check_file "$HOME/.claude/hooks/notification.ps1"        "Claude Code notification hook (ps1)"
+check_file "$HOME/.claude/hooks/post-compact.sh"         "Claude Code post-compact hook (sh)"
+check_file "$HOME/.claude/hooks/post-compact.ps1"        "Claude Code post-compact hook (ps1)"
+check_file "$HOME/.config/opencode/plugins/security.js"  "OpenCode security plugin"
+check_file "$HOME/.gemini/hooks/pre-tool-use.sh"         "Gemini hook (sh)"
+check_file "$HOME/.gemini/hooks/pre-tool-use.ps1"        "Gemini hook (ps1)"
+check_file "$ROOT/.github/hooks/hooks.json"              "Copilot repo hook config"
+
+# ─────────────────────────────────────────────
 # 5. Environment variables
 # ─────────────────────────────────────────────
 step "5/5 — Environment variables"
-for v in ANTHROPIC_AUTH_TOKEN BRIGHT_DATA_API_TOKEN GITHUB_TOKEN; do
+for v in ANTHROPIC_AUTH_TOKEN BRIGHTDATA_API_KEY GITHUB_TOKEN; do
     check_env "$v"
 done
 for v in NVIDIA_API_KEY OPENROUTER_API_KEY MISTRAL_API_KEY GOOGLE_CLOUD_PROJECT FIREBASE_TOKEN; do

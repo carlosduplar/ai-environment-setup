@@ -43,6 +43,27 @@
         "type": "command",
         "command": "~/.claude/hooks/pre-tool-use.sh"
       }]
+    }],
+    "PostToolUse": [{
+      "matcher": "(Edit|Write|Bash)",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/post-tool-use.sh"
+      }]
+    }],
+    "Notification": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/notification.sh"
+      }]
+    }],
+    "PostCompact": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "~/.claude/hooks/post-compact.sh"
+      }]
     }]
   }
 }

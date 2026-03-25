@@ -64,7 +64,8 @@ fi
 # ── COMPACT SAFETY CHECK ────────────────────────────────────────────────────
 # Intercept any attempt to run /compact or trigger compaction while tree is dirty.
 if [[ "$TOOL" == "Bash" && "$COMMAND" =~ compact ]]; then
-    if ! git diff --quiet HEAD 2>/dev/null; then
+    GIT_STATUS=$(git status --porcelain 2>/dev/null || true)
+    if [[ -n "$GIT_STATUS" ]]; then
         echo "Cannot compact with uncommitted changes. Commit or restore all changes first, then update PLAN.md status." >&2
         exit 1
     fi

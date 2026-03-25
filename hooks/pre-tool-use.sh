@@ -55,7 +55,7 @@ if [[ "$TOOL" =~ ^(read|view|edit|create|write|str_replace|insert)$ ]] || \
 
   for PATTERN in "${BLOCKED_PATTERNS[@]}"; do
     if echo "$TARGET_PATH" | grep -qiE "$PATTERN"; then
-      echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Secret file access blocked by pre-tool-use hook. Path matched pattern: $PATTERN. Do not attempt to read, write, or reference this file.\"}"
+      echo '{"permissionDecision":"deny","permissionDecisionReason":"Secret file access blocked by pre-tool-use hook. Do not attempt to read, write, or reference this file."}'
       exit 0
     fi
   done
@@ -65,7 +65,7 @@ if [[ "$TOOL" =~ ^(read|view|edit|create|write|str_replace|insert)$ ]] || \
     CMD=$(echo "$ARGS" | jq -r '.command // ""' 2>/dev/null || echo "$ARGS")
     for PATTERN in "${BLOCKED_PATTERNS[@]}"; do
       if echo "$CMD" | grep -qiE "$PATTERN"; then
-        echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Shell command references secret file path (pattern: $PATTERN). Blocked by pre-tool-use hook.\"}"
+        echo '{"permissionDecision":"deny","permissionDecisionReason":"Shell command references a blocked secret path. Blocked by pre-tool-use hook."}'
         exit 0
       fi
     done
@@ -77,7 +77,8 @@ fi
 if [[ "$TOOL" == "bash" ]]; then
   CMD=$(echo "$ARGS" | jq -r '.command // ""' 2>/dev/null || echo "$ARGS")
   if echo "$CMD" | grep -q "compact"; then
-    if ! git diff --quiet HEAD 2>/dev/null; then
+    GIT_STATUS=$(git status --porcelain 2>/dev/null || true)
+    if [[ -n "$GIT_STATUS" ]]; then
       echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"Cannot compact with uncommitted changes. Commit or restore all changes first, then update PLAN.md status.\"}"
       exit 0
     fi

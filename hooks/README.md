@@ -9,7 +9,7 @@ Hooks allow custom scripts to run at specific points in the AI tool lifecycle �
 | Claude Code | Shell scripts | `~/.claude/settings.json` → `hooks` |
 | OpenCode | JS/TS plugins | `~/.config/opencode/plugins/*.js` |
 | Gemini CLI | Shell scripts | `~/.gemini/settings.json` → `hooks` |
-| GitHub Copilot CLI | No | N/A |
+| GitHub Copilot CLI | Repo-scoped hook JSON | `.github/hooks/hooks.json` |
 
 ## Claude Code
 
@@ -33,7 +33,7 @@ Shell scripts referenced from `~/.claude/settings.json`:
 | `Notification` | On agent notifications |
 | `Stop` | When agent completes |
 
-Scripts: `claude-code-pre-tool-use.sh/ps1` → copied to `~/.claude/hooks/pre-tool-use.sh/ps1`
+Scripts copied to `~/.claude/hooks/`: `pre-tool-use.*`, `post-tool-use.*`, `notification.*`, `post-compact.*`
 
 ## OpenCode
 
@@ -86,6 +86,19 @@ Shell scripts referenced from `~/.gemini/settings.json`:
 | `SessionEnd` | Session ends |
 
 Scripts: `gemini-pre-tool-use.sh/ps1` → copied to `~/.gemini/hooks/pre-tool-use.sh/ps1`
+
+## GitHub Copilot CLI
+
+Copilot CLI hooks are repository-scoped. This repo config lives at `.github/hooks/hooks.json` and points to scripts in `hooks/`.
+
+| Event | Script |
+|-------|--------|
+| `preToolUse` | `hooks/pre-tool-use.sh` / `.ps1` |
+| `postToolUse` | `hooks/post-tool-use.sh` / `.ps1` |
+| `sessionStart` | `hooks/session-start.sh` / `.ps1` |
+| `sessionEnd` | `hooks/session-end.sh` / `.ps1` |
+
+There is no native global/user-level hook file for Copilot CLI; each repository must include its own `.github/hooks/hooks.json`.
 
 ## Security note
 

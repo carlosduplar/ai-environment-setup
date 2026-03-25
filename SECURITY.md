@@ -11,7 +11,7 @@ This repository contains **public-safe configuration scaffolding** only:
 
 | Category | Examples | Handling |
 |----------|----------|----------|
-| API keys & tokens | `ANTHROPIC_AUTH_TOKEN`, `OPENAI_API_KEY`, `NVAPI_*`, `BRIGHT_DATA_API_TOKEN` | Use `$ENV_VAR` placeholders |
+| API keys & tokens | `ANTHROPIC_AUTH_TOKEN`, `OPENAI_API_KEY`, `NVAPI_*`, `BRIGHTDATA_API_KEY` | Use `$ENV_VAR` placeholders |
 | OAuth credentials | `client_secret.json`, `oauth_creds.json`, `credentials.enc` | Listed in `.gitignore`, stored in private overlay |
 | SSH keys | `~/.ssh/id_*` | Never referenced in this repo |
 | Cookies & sessions | `token_cache.json`, `history.jsonl` | Listed in `.gitignore` |

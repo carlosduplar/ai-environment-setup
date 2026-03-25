@@ -110,22 +110,52 @@ foreach ($pkg in $npmPackages.packages) {
 # 4.5. Install agent skills
 # ─────────────────────────────────────────────
 Write-Step "5.5/9 — Install agent skills"
-$skillRepos = @(
-    "anthropics/skills",
-    "browser-use/browser-use",
-    "vercel-labs/skills",
-    "github/awesome-copilot",
-    "googleworkspace/cli",
-    "testdino-hq/playwright-skill/playwright-cli",
-    "coreyhaines31/marketingskills",
-    "vercel-labs/agent-skills"
-)
-foreach ($repo in $skillRepos) {
-    Write-Info "Installing skills from $repo..."
-    Invoke-Command -Cmd { npx skills add $repo } -DryRun:$DryRun
+function Install-LocalSkill {
+    param([string]$Skill)
+
+    $source = Join-Path $env:USERPROFILE ".agents\skills\$Skill"
+    if (-not (Test-Path $source)) {
+        Write-Warn "Local source for $Skill not found at $source; skipping."
+        return
+    }
+
+    Write-Info "Installing $Skill from $source..."
+    Invoke-Command -Cmd { npx skills add $source --skill $Skill } -DryRun:$DryRun
 }
-Write-Info "Installing bright-data-mcp skill..."
-Invoke-Command -Cmd { npx skills add https://github.com/brightdata/skills --skill bright-data-mcp } -DryRun:$DryRun
+
+Install-LocalSkill "brand-guidelines"
+Install-LocalSkill "canvas-design"
+Install-LocalSkill "context7-cli"
+Install-LocalSkill "doc-coauthoring"
+Install-LocalSkill "docx"
+Install-LocalSkill "find-docs"
+Install-LocalSkill "find-skills"
+Install-LocalSkill "frontend-design"
+Install-LocalSkill "gh-cli"
+Install-LocalSkill "gws-calendar"
+Install-LocalSkill "gws-docs"
+Install-LocalSkill "gws-drive"
+Install-LocalSkill "gws-gmail"
+Install-LocalSkill "gws-keep"
+Install-LocalSkill "gws-shared"
+Install-LocalSkill "gws-sheets"
+Install-LocalSkill "gws-tasks"
+Install-LocalSkill "gws-workflow-email-to-task"
+Install-LocalSkill "gws-workflow-meeting-prep"
+Install-LocalSkill "gws-workflow-standup-report"
+Install-LocalSkill "gws-workflow-weekly-digest"
+Install-LocalSkill "mcp-builder"
+Install-LocalSkill "pdf"
+Install-LocalSkill "playwright-cli"
+Install-LocalSkill "pptx"
+Install-LocalSkill "seo-audit"
+Install-LocalSkill "skill-creator"
+Install-LocalSkill "vercel-react-best-practices"
+Install-LocalSkill "vercel-react-native-skills"
+Install-LocalSkill "web-artifacts-builder"
+Install-LocalSkill "web-design-guidelines"
+Install-LocalSkill "webapp-testing"
+Install-LocalSkill "xlsx"
 
 # ─────────────────────────────────────────────
 # 5. Python tools via uv
@@ -178,9 +208,15 @@ $configs = @(
     @{ src = "$configDir\opencode\opencode.json.example";    dst = "$env:USERPROFILE\.config\opencode\opencode.json" },
     @{ src = "$configDir\gemini\GEMINI.md";                  dst = "$env:USERPROFILE\.gemini\GEMINI.md" },
     @{ src = "$configDir\gemini\mcp-server-enablement.json"; dst = "$env:USERPROFILE\.gemini\mcp-server-enablement.json" },
+    @{ src = "$configDir\opencode\plugins\security.js";       dst = "$env:USERPROFILE\.config\opencode\plugins\security.js" },
     @{ src = "$hooksDir\claude-code-pre-tool-use.sh";        dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.sh" },
     @{ src = "$hooksDir\claude-code-pre-tool-use.ps1";       dst = "$env:USERPROFILE\.claude\hooks\pre-tool-use.ps1" },
-    @{ src = "$configDir\opencode\plugins\security.js";       dst = "$env:USERPROFILE\.config\opencode\plugins\security.js" },
+    @{ src = "$hooksDir\post-tool-use.sh";                   dst = "$env:USERPROFILE\.claude\hooks\post-tool-use.sh" },
+    @{ src = "$hooksDir\post-tool-use.ps1";                  dst = "$env:USERPROFILE\.claude\hooks\post-tool-use.ps1" },
+    @{ src = "$hooksDir\notification.sh";                    dst = "$env:USERPROFILE\.claude\hooks\notification.sh" },
+    @{ src = "$hooksDir\notification.ps1";                   dst = "$env:USERPROFILE\.claude\hooks\notification.ps1" },
+    @{ src = "$hooksDir\post-compact.sh";                    dst = "$env:USERPROFILE\.claude\hooks\post-compact.sh" },
+    @{ src = "$hooksDir\post-compact.ps1";                   dst = "$env:USERPROFILE\.claude\hooks\post-compact.ps1" },
     @{ src = "$hooksDir\gemini-pre-tool-use.sh";             dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
     @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
 )

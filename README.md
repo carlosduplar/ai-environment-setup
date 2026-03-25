@@ -179,12 +179,12 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 
 ### Pre-Built Hooks
 
-| Tool | Hook Script | Mechanism |
-|------|-------------|-----------|
-| Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny |
-| OpenCode | `opencode-pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` |
-| Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny |
-| GitHub Copilot CLI | `.github/hooks/hooks.json` | Uses `.github/hooks/` directory in repo |
+| Tool | Hook Script | Mechanism | Global (User) Config | Repo Config |
+|------|-------------|-----------|---------------------|-------------|
+| Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.claude/settings.json` | `.claude/settings.json` |
+| OpenCode | `config/opencode/plugins/security.js` | Plugin hook (`tool.execute.before`) — throw Error to deny | `~/.config/opencode/opencode.json` + `~/.config/opencode/plugins/` | `config/opencode/plugins/` |
+| Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.gemini/` | `.gemini/` |
+| GitHub Copilot CLI | `hooks/pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` | Not supported | `.github/hooks/*.json` |
 
 ### Shared Hook Scripts (all platforms)
 
@@ -207,9 +207,19 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 ### Hook Scope by Tool
 
 - **Claude Code**: Uses `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
-- **OpenCode**: Receives JSON via stdin: `{"toolName": "Read", "toolArgs": {"filePath": "..."}}`. Output: `{"permissionDecision": "allow"}` or `{"permissionDecision": "deny", "reason": "..."}`.
+- **OpenCode**: Uses `config/opencode/plugins/security.js` (`tool.execute.before`). The plugin inspects `input.tool` + args and throws to deny unsafe actions.
 - **Gemini CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
-- **GitHub Copilot CLI**: No hook support. Secret protection enforced via generic pre-tool-use hook (manual config).
+- **GitHub Copilot CLI**: Hooks are **repo-scoped only** (`.github/hooks/`). There is **no global/user-level hook config** — hooks must be added to each repository individually. This is a known limitation tracked in [GitHub issue #1157](https://github.com/github/copilot-cli/issues/1157).
+
+### Copilot CLI Hook Limitation
+
+Unlike Claude Code, OpenCode, and Gemini CLI — which all support global/user-level hook configuration — GitHub Copilot CLI currently **does not support user-based hook files**. This means:
+
+- Hooks only work when running Copilot CLI **from within a repository** that has `.github/hooks/*.json`
+- Each repo must independently include its own hook configuration
+- There is no `~/.copilot/hooks.json` or equivalent that applies across all repos
+
+**Workaround**: We place hooks in `.github/hooks/hooks.json` in this repo. For other repos, you must manually copy the hook config. A third-party tool, [gh-hookflow](https://github.com/htekdev/gh-hookflow), can install personal hooks at `~/.copilot/hooks/hooks.json`, but this is not native Copilot CLI behavior.
 
 See [hooks/README.md](hooks/README.md) and [docs/hooks-catalog.md](docs/hooks-catalog.md) for details.
 

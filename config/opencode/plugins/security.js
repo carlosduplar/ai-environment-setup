@@ -49,7 +49,7 @@ export const SecurityPlugin = async ({ $ }) => {
   return {
     "tool.execute.before": async (input, output) => {
       const tool = input.tool
-      const args = output.args
+      const args = output?.args || input?.args || {}
 
       if (FILE_TOOLS.includes(tool)) {
         const targetPath = args?.filePath || args?.path || args?.file || args?.url || ""
@@ -74,8 +74,8 @@ export const SecurityPlugin = async ({ $ }) => {
         }
 
         if (cmd.includes("compact")) {
-          const status = await $`git diff --quiet HEAD`.nothrow().text()
-          if (status.trim() !== "") {
+          const status = await $`git status --porcelain`.nothrow().text()
+          if (status.trim().length > 0) {
             throw new Error(
               "Cannot compact with uncommitted changes. Commit or restore all changes first."
             )

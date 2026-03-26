@@ -60,16 +60,40 @@ if ($tool -eq "bash") {
 # Whitelisted commands that bypass permission prompts
 $safeCommands = @(
 	'^npm test',
+	'^npm run test',
 	'^npm run lint',
 	'^npm run typecheck',
+	'^npm run build',
+	'^pnpm test',
+	'^pnpm run test',
+	'^pnpm run lint',
+	'^pnpm run typecheck',
+	'^pnpm run build',
+	'^yarn test',
+	'^yarn lint',
+	'^yarn typecheck',
+	'^yarn build',
 	'^npx prettier',
 	'^git diff',
 	'^git status',
 	'^git log',
+	'^git show',
+	'^git rev-parse',
+	'^git ls-files',
+	'^git branch --show-current',
+	'^rg ',
+	'^grep ',
+	'^ls',
+	'^cat',
+	'^head ',
+	'^tail ',
+	'^wc ',
+	'^find ',
+	'^tree',
 	'^pytest',
-	'^pip install',
-	'^cargo build',
-	'^cargo test'
+	'^python -m pytest',
+	'^ruff check',
+	'^mypy '
 )
 if ($tool -eq "bash") {
 	try {

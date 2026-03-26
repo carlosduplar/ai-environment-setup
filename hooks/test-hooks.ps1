@@ -82,6 +82,19 @@ function Assert-Allow($label) {
     }
 }
 
+function Assert-NotAutoAllow($label) {
+    if ([string]::IsNullOrWhiteSpace($script:HookOut)) {
+        Write-Pass "$label (no explicit allow)"
+        return
+    }
+    $decision = $script:HookOut | jq -r '.permissionDecision' 2>$null
+    if ($decision -ne 'allow') {
+        Write-Pass "$label (not explicitly auto-allowed)"
+    } else {
+        Write-Fail "$label — expected no auto-allow, got: $($script:HookOut)"
+    }
+}
+
 function Assert-ValidJson($label) {
     if ([string]::IsNullOrWhiteSpace($script:HookOut)) {
         Write-Pass "$label (empty = valid allow)"
@@ -233,6 +246,19 @@ if (-not (Test-Path $script)) {
 
     Invoke-Hook $script (New-Payload "read"  '{"path":"docs/environment-guide.md"}')
     Assert-Allow "docs/environment-guide.md is allowed"
+
+    Invoke-Hook $script (New-Payload "bash" '{"command":"git show HEAD --stat"}')
+    Assert-Allow "git show is auto-allowed"
+
+    Invoke-Hook $script (New-Payload "bash" '{"command":"npm run lint"}')
+    Assert-Allow "npm run lint is auto-allowed"
+
+    Invoke-Hook $script (New-Payload "bash" '{"command":"python -m pytest -q"}')
+    Assert-Allow "python -m pytest is auto-allowed"
+
+    # Should NOT auto-allow (must remain approval-gated by permission system)
+    Invoke-Hook $script (New-Payload "bash" '{"command":"pip install requests"}')
+    Assert-NotAutoAllow "pip install is not auto-allowed"
 
     # Compact safety
     "dirty" | Set-Content (Join-Path $repo "dirty.txt")

@@ -11,6 +11,17 @@ fail() { echo "  FAIL  $1"; ((FAIL++)); }
 skip() { echo "  SKIP  $1"; ((SKIP++)); }
 header() { echo ""; echo "── $1 ──────────────────────────────────────"; }
 
+assert_not_auto_allow() {
+  local out=$1 label=$2
+  local decision
+  decision=$(echo "$out" | jq -r '.permissionDecision // ""' 2>/dev/null)
+  if [ -z "$out" ] || [ "$decision" != "allow" ]; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
 # Verify dependencies
 for cmd in jq git; do
   if ! command -v "$cmd" &>/dev/null; then
@@ -115,6 +126,30 @@ else
   else
     fail "package.json view is allowed"
   fi
+
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"git show HEAD --stat"}')" "$REPO")
+  if echo "$OUT" | jq -e '.permissionDecision == "allow"' >/dev/null 2>&1; then
+    pass "git show is auto-allowed"
+  else
+    fail "git show is auto-allowed"
+  fi
+
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"npm run lint"}')" "$REPO")
+  if echo "$OUT" | jq -e '.permissionDecision == "allow"' >/dev/null 2>&1; then
+    pass "npm run lint is auto-allowed"
+  else
+    fail "npm run lint is auto-allowed"
+  fi
+
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"python -m pytest -q"}')" "$REPO")
+  if echo "$OUT" | jq -e '.permissionDecision == "allow"' >/dev/null 2>&1; then
+    pass "python -m pytest is auto-allowed"
+  else
+    fail "python -m pytest is auto-allowed"
+  fi
+
+  OUT=$(run_hook_sh "$SCRIPT" "$(new_payload "bash" '{"command":"pip install requests"}')" "$REPO")
+  assert_not_auto_allow "$OUT" "pip install is not auto-allowed"
 
   # Compact safety
   echo "dirty" > "$REPO/dirty.txt"

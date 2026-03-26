@@ -87,13 +87,24 @@ Paths in `.github/hooks/hooks.json` are resolved from `.github/hooks/`. In this 
 
 ## OpenCode Configuration
 
-OpenCode uses JS plugins instead of shell hook scripts. Copy the security plugin to:
+OpenCode uses JS plugins instead of shell hook scripts. Copy these plugins to:
 
 ```text
 ~/.config/opencode/plugins/security.js
+~/.config/opencode/plugins/format-on-write.js
+~/.config/opencode/plugins/notifications.js
+~/.config/opencode/plugins/context-refresh.js
+~/.config/opencode/plugins/session-lifecycle.js
 ```
 
-The plugin listens to `tool.execute.before` and blocks secret-file access and unsafe compact calls.
+Event mapping (validated against OpenCode plugin docs via Context7):
+
+- `tool.execute.before` → pre-tool guard (`security.js`)
+- `tool.execute.after` → post-tool formatter (`format-on-write.js`)
+- `permission.asked` → notification trigger (`notifications.js`)
+- `session.created` → session-start checks (`session-lifecycle.js`)
+- `session.idle` / `session.deleted` → session-end summaries (`session-lifecycle.js`)
+- `session.compacted` / `experimental.session.compacting` → compact lifecycle hooks (`context-refresh.js`)
 
 ## Currently configured hooks
 
@@ -209,7 +220,7 @@ Catches the post compact event. When Claude compacts its context, this hook auto
 
 ### Hook 5: Auto-Approval God Mode
 
-Pre-tool use hook on bash that checks commands against a whitelist. If matches (npm test, npx prettier, git diff, etc.), outputs JSON with decision set to allow. Claude skips permission prompts entirely.
+Pre-tool use hook on bash that checks commands against a whitelist. If matched, it auto-allows low-risk local commands (git/file inspection and local test/lint/typecheck/build checks). Install/network/destructive commands remain approval-gated or denied.
 
 ```json
 "hooks": {
@@ -217,7 +228,7 @@ Pre-tool use hook on bash that checks commands against a whitelist. If matches (
     "matcher": "Bash",
     "hooks": [{
       "type": "command",
-      "command": "pwsh -c \"$cmd = $env:CLAUDE_TOOL_INPUT_COMMAND; if ($cmd -match '^(npm test|npm run lint|npx prettier|git diff|git status|pytest)') { Write-Output '{ \"decision\": \"allow\" }' }\""
+      "command": "pwsh -c \"$cmd = $env:CLAUDE_TOOL_INPUT_COMMAND; if ($cmd -match '^(npm test|npm run lint|npm run typecheck|npm run build|git diff|git status|git show|git log|rg\\s|grep\\s|pytest|python -m pytest|ruff check|mypy\\s)') { Write-Output '{ \\\"permissionDecision\\\":\\\"allow\\\" }' }\""
     }]
   }]
 }
@@ -263,6 +274,6 @@ The repository includes ready-to-use hook assets:
 - `post-tool-use.sh` / `.ps1`, `notification.sh` / `.ps1`, `post-compact.sh` / `.ps1` – Claude Code lifecycle hooks
 - `gemini-pre-tool-use.sh` / `.ps1` – Gemini CLI pre-tool guard
 - `pre-tool-use.sh` / `.ps1`, `post-tool-use.sh` / `.ps1`, `session-start.sh` / `.ps1`, `session-end.sh` / `.ps1` – Copilot CLI repo hooks
-- `config/opencode/plugins/security.js` – OpenCode plugin hook
+- `config/opencode/plugins/security.js`, `format-on-write.js`, `notifications.js`, `context-refresh.js`, `session-lifecycle.js` – OpenCode plugin hooks
 
 Bootstrap copies these to user hook/plugin directories (Claude, Gemini, OpenCode). Copilot hooks stay repo-scoped in `.github/hooks/hooks.json`.

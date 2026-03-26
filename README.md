@@ -195,7 +195,7 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 | Tool | Hook Script | Mechanism | Global (User) Config | Repo Config |
 |------|-------------|-----------|---------------------|-------------|
 | Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.claude/settings.json` | `.claude/settings.json` |
-| OpenCode | `config/opencode/plugins/security.js` | Plugin hook (`tool.execute.before`) — throw Error to deny | `~/.config/opencode/opencode.json` + `~/.config/opencode/plugins/` | `config/opencode/plugins/` |
+| OpenCode | `config/opencode/plugins/*.js` | Plugin hooks (`tool.execute.before`, `tool.execute.after`, `permission.asked`, session lifecycle events) | `~/.config/opencode/opencode.json` + `~/.config/opencode/plugins/` | `config/opencode/plugins/` |
 | Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.gemini/` | `.gemini/` |
 | GitHub Copilot CLI | `hooks/pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` | Not supported | `.github/hooks/*.json` |
 
@@ -214,13 +214,13 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 - **Hook 2: Secret file protection** — Deny read/edit/create on `.env`, `secrets/`, `*.key`, `credentials.json`, etc.
 - **Hook 3: Desktop Notifications** — Native OS alerts when Claude needs your input
 - **Hook 4: Context Memory Refresh** — Re-reads critical files (CLAUDE.md, ARCHITECTURE.md) after context compaction
-- **Hook 5: Auto-Approval God Mode** — Whitelists safe commands (npm test, git diff, etc.) to skip permission prompts
+- **Hook 5: Auto-Approval God Mode** — Whitelists safe local commands (read-only git/file inspection + test/lint/typecheck/build checks) to skip permission prompts, while installs/network/destructive commands remain gated
 - **Compact safety check** — Block `/compact` when git working tree has uncommitted changes
 
 ### Hook Scope by Tool
 
 - **Claude Code**: Uses `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
-- **OpenCode**: Uses `config/opencode/plugins/security.js` (`tool.execute.before`). The plugin inspects `input.tool` + args and throws to deny unsafe actions.
+- **OpenCode**: Uses plugins in `config/opencode/plugins/`. `security.js` handles pre-tool guardrails, `format-on-write.js` handles post-tool formatting, `notifications.js` handles permission/session notifications, and `context-refresh.js` + `session-lifecycle.js` handle compact/session lifecycle hooks.
 - **Gemini CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
 - **GitHub Copilot CLI**: Hooks are **repo-scoped only** (`.github/hooks/`). There is **no global/user-level hook config** — hooks must be added to each repository individually. This is a known limitation tracked in [GitHub issue #1157](https://github.com/github/copilot-cli/issues/1157).
 

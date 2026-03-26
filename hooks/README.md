@@ -55,9 +55,44 @@ export const SecurityPlugin = async ({ $ }) => {
 | `tool.execute.after` | After any tool call |
 | `session.created` | New session started |
 | `session.idle` | Session becomes idle |
+| `session.deleted` | Session ended/deleted |
+| `session.compacted` | Session compacted |
 | `permission.asked` | Permission requested |
+| `experimental.session.compacting` | Before compaction prompt is finalized |
 
-Plugin: `config/opencode/plugins/security.js` → copied to `~/.config/opencode/plugins/security.js`
+Plugins copied to `~/.config/opencode/plugins/`:
+
+- `security.js` → secret-path guard + compact safety (`tool.execute.before`)
+- `format-on-write.js` → auto-format supported edited files (`tool.execute.after`)
+- `notifications.js` → desktop/terminal notifications (`permission.asked`, `session.idle`)
+- `context-refresh.js` → compaction memory hook (`experimental.session.compacting`, `session.compacted`)
+- `session-lifecycle.js` → session start/end checks and PLAN summary (`session.created`, `session.idle`, `session.deleted`)
+- `binary-to-markdown.js` → convert supported binary reads to Markdown (`tool.execute.before`)
+
+## Binary-to-Markdown Package
+
+This repository also ships a dedicated hook package at `hooks/binary-to-markdown/` for binary document conversion.
+
+- `convert.py` runs `markitdown` and optionally falls back to Mistral OCR for poor PDF extraction.
+- `claude-code.sh/.ps1` returns Claude block responses with injected converted Markdown.
+- `gemini.sh/.ps1` converts and logs guidance (Gemini cannot inject replacement content).
+- `codex.sh/.ps1` is an explicit stub until Codex hook specs are published.
+- OpenCode uses `config/opencode/plugins/binary-to-markdown.js` instead of shell wrappers.
+
+### OpenCode compatibility for README hook options
+
+| Hook option in this README | OpenCode mapping | Status |
+|----------------------------|------------------|--------|
+| `PreToolUse` / `BeforeTool` / `preToolUse` | `tool.execute.before` | Implemented |
+| `PostToolUse` / `AfterTool` / `postToolUse` | `tool.execute.after` | Implemented |
+| `Notification` | `permission.asked` | Implemented |
+| `PostCompact` | `session.compacted` + `experimental.session.compacting` | Implemented |
+| `SessionStart` / `sessionStart` | `session.created` | Implemented |
+| `Stop` / `SessionEnd` / `sessionEnd` | `session.idle` + `session.deleted` | Implemented |
+| `BeforeAgent` | No equivalent plugin event in docs | Not supported |
+| `BeforeToolSelection` | No equivalent plugin event in docs | Not supported |
+| `AfterModel` | No equivalent plugin event in docs | Not supported |
+| `AfterAgent` | No equivalent plugin event in docs | Not supported |
 
 ## Gemini CLI
 

@@ -115,6 +115,10 @@ if ($hasClaude) {
 if ($hasOpenCode) {
     Test-File "$env:USERPROFILE\.config\opencode\opencode.json"     "OpenCode config"
     Test-File "$env:USERPROFILE\.config\opencode\plugins\security.js" "OpenCode security plugin"
+    Test-File "$env:USERPROFILE\.config\opencode\plugins\format-on-write.js" "OpenCode format-on-write plugin"
+    Test-File "$env:USERPROFILE\.config\opencode\plugins\notifications.js" "OpenCode notifications plugin"
+    Test-File "$env:USERPROFILE\.config\opencode\plugins\context-refresh.js" "OpenCode context-refresh plugin"
+    Test-File "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" "OpenCode session-lifecycle plugin"
 } else {
     Write-Info "OpenCode not installed — skipping its config checks"
 }

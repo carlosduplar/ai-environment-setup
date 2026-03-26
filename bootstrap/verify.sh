@@ -79,6 +79,10 @@ fi
 if [[ "$has_opencode" == "true" ]]; then
     check_file "$HOME/.config/opencode/opencode.json"       "OpenCode config"
     check_file "$HOME/.config/opencode/plugins/security.js" "OpenCode security plugin"
+    check_file "$HOME/.config/opencode/plugins/format-on-write.js" "OpenCode format-on-write plugin"
+    check_file "$HOME/.config/opencode/plugins/notifications.js" "OpenCode notifications plugin"
+    check_file "$HOME/.config/opencode/plugins/context-refresh.js" "OpenCode context-refresh plugin"
+    check_file "$HOME/.config/opencode/plugins/session-lifecycle.js" "OpenCode session-lifecycle plugin"
 else
     info "OpenCode not installed — skipping its config checks"
 fi

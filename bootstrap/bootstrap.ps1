@@ -224,7 +224,11 @@ if ($agents.claude) {
 if ($agents.opencode) {
     $sharedConfigs += @(
         @{ src = "$configDir\opencode\opencode.json.example";    dst = "$env:USERPROFILE\.config\opencode\opencode.json" },
-        @{ src = "$configDir\opencode\plugins\security.js";       dst = "$env:USERPROFILE\.config\opencode\plugins\security.js" }
+        @{ src = "$configDir\opencode\plugins\security.js";       dst = "$env:USERPROFILE\.config\opencode\plugins\security.js" },
+        @{ src = "$configDir\opencode\plugins\format-on-write.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\format-on-write.js" },
+        @{ src = "$configDir\opencode\plugins\notifications.js";   dst = "$env:USERPROFILE\.config\opencode\plugins\notifications.js" },
+        @{ src = "$configDir\opencode\plugins\context-refresh.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\context-refresh.js" },
+        @{ src = "$configDir\opencode\plugins\session-lifecycle.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" }
     )
 }
 

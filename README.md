@@ -208,6 +208,14 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 | `notification.ps1/.sh` | Hook 3 (Desktop notifications) |
 | `post-compact.ps1/.sh` | Hook 4 (Context memory refresh) |
 
+### Binary-to-Markdown Hook Package
+
+- Location: `hooks/binary-to-markdown/`
+- Purpose: Convert supported binary files (`.pdf`, `.docx`, `.xlsx`, `.xls`, `.pptx`, `.ppt`, `.epub`, `.ipynb`) to Markdown before model ingestion
+- Core converter: `hooks/binary-to-markdown/convert.py` (markitdown primary + optional Mistral OCR fallback for poor PDF extraction)
+- OpenCode integration: `config/opencode/plugins/binary-to-markdown.js`
+- Limitation: `.doc` is excluded (legacy binary Word format is not reliably supported by `markitdown`)
+
 ### What the Hooks Do
 
 - **Hook 1: Auto-Format Every File Edit** — Runs Prettier on every file edit/write automatically
@@ -216,11 +224,13 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 - **Hook 4: Context Memory Refresh** — Re-reads critical files (CLAUDE.md, ARCHITECTURE.md) after context compaction
 - **Hook 5: Auto-Approval God Mode** — Whitelists safe local commands (read-only git/file inspection + test/lint/typecheck/build checks) to skip permission prompts, while installs/network/destructive commands remain gated
 - **Compact safety check** — Block `/compact` when git working tree has uncommitted changes
+- **Binary-to-Markdown** — Intercepts supported binary reads and injects converted Markdown to reduce token usage and improve text extraction quality
 
 ### Hook Scope by Tool
 
 - **Claude Code**: Uses `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
 - **OpenCode**: Uses plugins in `config/opencode/plugins/`. `security.js` handles pre-tool guardrails, `format-on-write.js` handles post-tool formatting, `notifications.js` handles permission/session notifications, and `context-refresh.js` + `session-lifecycle.js` handle compact/session lifecycle hooks.
+- **OpenCode (binary conversion)**: `config/opencode/plugins/binary-to-markdown.js` intercepts `read` calls for supported binary extensions and returns converted Markdown via deny reason payload.
 - **Gemini CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
 - **GitHub Copilot CLI**: Hooks are **repo-scoped only** (`.github/hooks/`). There is **no global/user-level hook config** — hooks must be added to each repository individually. This is a known limitation tracked in [GitHub issue #1157](https://github.com/github/copilot-cli/issues/1157).
 

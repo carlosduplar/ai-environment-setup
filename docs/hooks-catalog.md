@@ -95,6 +95,7 @@ OpenCode uses JS plugins instead of shell hook scripts. Copy these plugins to:
 ~/.config/opencode/plugins/notifications.js
 ~/.config/opencode/plugins/context-refresh.js
 ~/.config/opencode/plugins/session-lifecycle.js
+~/.config/opencode/plugins/binary-to-markdown.js
 ```
 
 Event mapping (validated against OpenCode plugin docs via Context7):
@@ -105,10 +106,15 @@ Event mapping (validated against OpenCode plugin docs via Context7):
 - `session.created` → session-start checks (`session-lifecycle.js`)
 - `session.idle` / `session.deleted` → session-end summaries (`session-lifecycle.js`)
 - `session.compacted` / `experimental.session.compacting` → compact lifecycle hooks (`context-refresh.js`)
+- `tool.execute.before` → binary file conversion hook (`binary-to-markdown.js`)
 
 ## Currently configured hooks
 
 Hooks only run when referenced in each tool's settings (for Claude Code, `~/.claude/settings.json` → `hooks`).
+
+| Hook | Description |
+|------|-------------|
+| binary-to-markdown | Converts binary files (PDF, DOCX, XLSX, PPTX…) to Markdown before the AI reads them, reducing token consumption by 10–30× |
 
 ## Example hooks
 
@@ -273,7 +279,8 @@ The repository includes ready-to-use hook assets:
 - `claude-code-pre-tool-use.sh` / `.ps1` – Claude Code pre-tool guard
 - `post-tool-use.sh` / `.ps1`, `notification.sh` / `.ps1`, `post-compact.sh` / `.ps1` – Claude Code lifecycle hooks
 - `gemini-pre-tool-use.sh` / `.ps1` – Gemini CLI pre-tool guard
+- `hooks/binary-to-markdown/convert.py`, `claude-code.sh` / `.ps1`, `gemini.sh` / `.ps1`, `codex.sh` / `.ps1` – binary document conversion package
 - `pre-tool-use.sh` / `.ps1`, `post-tool-use.sh` / `.ps1`, `session-start.sh` / `.ps1`, `session-end.sh` / `.ps1` – Copilot CLI repo hooks
-- `config/opencode/plugins/security.js`, `format-on-write.js`, `notifications.js`, `context-refresh.js`, `session-lifecycle.js` – OpenCode plugin hooks
+- `config/opencode/plugins/security.js`, `format-on-write.js`, `notifications.js`, `context-refresh.js`, `session-lifecycle.js`, `binary-to-markdown.js` – OpenCode plugin hooks
 
 Bootstrap copies these to user hook/plugin directories (Claude, Gemini, OpenCode). Copilot hooks stay repo-scoped in `.github/hooks/hooks.json`.

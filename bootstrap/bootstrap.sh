@@ -226,6 +226,10 @@ fi
 if [[ "${AGENTS[opencode]}" == "true" ]]; then
     CONFIGS["$CONFIG/opencode/opencode.json.example"]="$HOME_DIR/.config/opencode/opencode.json"
     CONFIGS["$CONFIG/opencode/plugins/security.js"]="$HOME_DIR/.config/opencode/plugins/security.js"
+    CONFIGS["$CONFIG/opencode/plugins/format-on-write.js"]="$HOME_DIR/.config/opencode/plugins/format-on-write.js"
+    CONFIGS["$CONFIG/opencode/plugins/notifications.js"]="$HOME_DIR/.config/opencode/plugins/notifications.js"
+    CONFIGS["$CONFIG/opencode/plugins/context-refresh.js"]="$HOME_DIR/.config/opencode/plugins/context-refresh.js"
+    CONFIGS["$CONFIG/opencode/plugins/session-lifecycle.js"]="$HOME_DIR/.config/opencode/plugins/session-lifecycle.js"
 fi
 
 # Gemini config + hooks

@@ -5,9 +5,8 @@ Machine-readable inventories of every package this environment depends on.
 | File | Package Manager | Command |
 |------|----------------|---------|
 | `npm-global.json` | npm | `npm install -g <package>` |
-| `pip-packages.txt` | uv | `uv tool install <package>` |
+| `pip-packages.txt` | pip | `pip install <package>` |
 | `winget.json` | winget | `winget import --import-file winget.json` |
-| `choco.json` | Chocolatey | `choco install <name>` |
 
 ## Updating manifests
 

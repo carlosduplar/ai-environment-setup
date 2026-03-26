@@ -17,6 +17,8 @@ Skills are activated by name in the Copilot CLI or Claude Code session. For alwa
 
 See [catalog/](catalog/) for all skill definitions.
 
+Skills marked with **-GWS** require the `-GWS` bootstrap flag (includes `@googleworkspace/cli`).
+
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|
 | brand-guidelines | No | Anthropic brand colors and typography |
@@ -29,18 +31,18 @@ See [catalog/](catalog/) for all skill definitions.
 | find-skills | No | Discover and install new skills |
 | frontend-design | No | Production-grade frontend UI generation |
 | gh-cli | No | GitHub CLI (`gh`) reference |
-| gws-calendar | No | Google Calendar operations |
-| gws-docs | No | Read/write Google Docs |
-| gws-drive | No | Google Drive file management |
-| gws-gmail | No | Gmail send/read/manage |
-| gws-keep | No | Google Keep notes |
-| gws-shared | No | Shared gws CLI patterns |
-| gws-sheets | No | Google Sheets read/write |
-| gws-tasks | No | Google Tasks management |
-| gws-workflow-email-to-task | No | Gmail → Google Tasks workflow |
-| gws-workflow-meeting-prep | No | Meeting prep from calendar + docs |
-| gws-workflow-standup-report | No | Standup summary from calendar + tasks |
-| gws-workflow-weekly-digest | No | Weekly calendar + email digest |
+| gws-calendar **-GWS** | No | Google Calendar operations |
+| gws-docs **-GWS** | No | Read/write Google Docs |
+| gws-drive **-GWS** | No | Google Drive file management |
+| gws-gmail **-GWS** | No | Gmail send/read/manage |
+| gws-keep **-GWS** | No | Google Keep notes |
+| gws-shared **-GWS** | No | Shared gws CLI patterns |
+| gws-sheets **-GWS** | No | Google Sheets read/write |
+| gws-tasks **-GWS** | No | Google Tasks management |
+| gws-workflow-email-to-task **-GWS** | No | Gmail → Google Tasks workflow |
+| gws-workflow-meeting-prep **-GWS** | No | Meeting prep from calendar + docs |
+| gws-workflow-standup-report **-GWS** | No | Standup summary from calendar + tasks |
+| gws-workflow-weekly-digest **-GWS** | No | Weekly calendar + email digest |
 | mcp-builder | No | Build MCP servers (FastMCP/MCP SDK) |
 | pdf | No | PDF read/create/merge/split |
 | playwright-cli | No | Browser automation via Playwright |

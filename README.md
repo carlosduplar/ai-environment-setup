@@ -53,7 +53,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory
 ```
 ai-environment-setup/
 ├── bootstrap/          # Install + verify scripts
-├── manifests/          # Package inventories (npm, pip, winget, choco)
+├── manifests/          # Package inventories (npm, pip, winget)
 ├── dotfiles/           # Shell and git config examples
 ├── config/ # AI tool config scaffolding (no secrets)
 │   ├── claude-code/
@@ -79,8 +79,14 @@ cd ai-environment-setup
 Copy-Item templates\.env.example .env.local
 # Edit .env.local with your actual API keys — never commit this file
 
-# 3. Run bootstrap (installs all CLIs)
+# 3. Run bootstrap (detects installed agents, configures them)
 .\bootstrap\bootstrap.ps1
+
+# Optional: include Google Workspace CLI + skills
+.\bootstrap\bootstrap.ps1 -GWS
+
+# Optional: include Firebase CLI
+.\bootstrap\bootstrap.ps1 -Firebase
 
 # 4. Verify everything is in place
 .\bootstrap\verify.ps1
@@ -93,7 +99,13 @@ git clone https://github.com/<YOUR_USERNAME>/ai-environment-setup
 cd ai-environment-setup
 cp templates/.env.example .env.local
 # Edit .env.local
+
+# Run bootstrap (detects installed agents, configures them)
 bash bootstrap/bootstrap.sh
+
+# Optional flags
+bash bootstrap/bootstrap.sh --gws --firebase
+
 bash bootstrap/verify.sh
 ```
 
@@ -103,18 +115,16 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 
 | Tool | Description | Install Method | Config Location |
 |------|-------------|---------------|-----------------|
-| Claude Code | Anthropic's AI coding assistant | `winget install Anthropic.ClaudeCode` / native installer | `~/.claude/settings.json` |
-| OpenCode | OpenCode's AI coding assistant | `npm -g opencode` | `~/.config/opencode/opencode.json` |
-| Gemini CLI | Google's AI CLI | `npm -g @google/gemini-cli` | `~/.gemini/GEMINI.md` |
-| GitHub Copilot CLI | GitHub's AI coding assistant | `winget install GitHub.Copilot` / `npm -g @github/copilot` | `~/.config/copilot/` |
-| Playwright CLI | Browser automation for testing and scraping | `npm install -g @playwright/cli` | Per-project |
+| Claude Code | Anthropic's AI coding assistant | Detected; configure if present | `~/.claude/settings.json` |
+| OpenCode | OpenCode's AI coding assistant | Detected; configure if present | `~/.config/opencode/opencode.json` |
+| Gemini CLI | Google's AI CLI | Detected; configure if present | `~/.gemini/GEMINI.md` |
+| GitHub Copilot CLI | GitHub's AI coding assistant | Detected; configure if present | `~/.copilot/` |
+| Playwright CLI | Browser automation | `npm install -g @playwright/cli` | Per-project |
 | Context7 (ctx7) | Fetch current library docs | `npm -g ctx7` | Per-project |
-| Firebase CLI | Firebase project management | `npm -g firebase-tools` | `~/.config/configstore/` |
-| gcloud | Google Cloud SDK CLI | Google Cloud SDK installer | `~/.config/gcloud/` |
-| gws | Google Workspace (Docs, Sheets, Drive, etc.) | `npm -g @googleworkspace/cli` | `~/.config/gws/` |
-| markitdown | Convert documents to Markdown | `uv tool install markitdown` | None |
+| markitdown | Convert documents to Markdown | `pip install markitdown` | None |
 | gh | GitHub CLI | `winget install GitHub.cli` | `~/.config/gh/` |
-| Bright Data | Web scraping and search CLI | `npm -g @brightdata/cli` | `~/.config/brightdata/` |
+| Firebase CLI | Firebase project management | `-Firebase` flag (opt-in) | `~/.config/configstore/` |
+| gws | Google Workspace CLI | `-GWS` flag (opt-in) | `~/.config/gws/` |
 
 ## Configuration Flow
 
@@ -128,7 +138,10 @@ templates/.env.example
 config/claude-code/settings.json.example  ──(apply)──>  ~/.claude/settings.json
 config/opencode/opencode.json.example     ──(apply)──>  ~/.config/opencode/opencode.json
 config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI.md
+config/github-copilot/copilot-instructions.md  ──(apply)──>  ~/.copilot/copilot-instructions.md
 ```
+
+Config scaffolding is **agent-gated** — only configures tools that are already installed. Run `.\bootstrap\verify.ps1` to see which agents were detected.
 
 ## Update Flow
 
@@ -225,7 +238,9 @@ See [hooks/README.md](hooks/README.md) and [docs/hooks-catalog.md](docs/hooks-ca
 
 ## Skills
 
-Agent skills extend AI tool capabilities. Installed via `npx skills add <repo>`.
+Agent skills extend AI tool capabilities. Installed via `npx skills add` from local sources.
+
+Skills are installed per the [skills catalog](skills/README.md). Google Workspace skills (`gws-*`) are gated behind the `-GWS` flag and are not installed by default.
 
 ### Rule: When to Add a Skill
 

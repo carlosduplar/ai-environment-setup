@@ -1,6 +1,6 @@
 # Skills Catalog
 
-Claude Code skills installed via `npx skills add`. See actual installed skills with `npx skills list -g`.
+Claude Code skills can be inspected with `npx skills ls --json`, updated with `npx skills update -g -y`, and added with `npx skills add <skill-name> -g -y`.
 
 ## All skills
 
@@ -48,13 +48,13 @@ Skills are installed via the `skill-creator` skill or directly via CLI:
 
 ```bash
 # List installed skills
-npx skills list -g
+npx skills ls --json
 
-# Add a skill from a repo
-npx skills add <owner/repo>
+# Update installed global skills
+npx skills update -g -y
 
-# Add a specific skill from a repo
-npx skills add https://github.com/owner/repo --skill skill-name
+# Add one global skill by name
+npx skills add <skill-name> -g -y
 ```
 
 See bootstrap scripts for the full list of skills installed in this environment.

@@ -95,17 +95,66 @@ if ($GWS) {
 # 3. Install agent skills
 # ─────────────────────────────────────────────
 Write-Step "3/7 — Install agent skills"
-function Install-LocalSkill {
-    param([string]$Skill)
+function Get-InstalledSkillMap {
+    $map = @{}
+    if ($DryRun) {
+        Write-Info "[DRY-RUN] npx skills ls --json"
+        return @{ Success = $false; Map = $map }
+    }
 
-    $source = Join-Path $env:USERPROFILE ".agents\skills\$Skill"
-    if (-not (Test-Path $source)) {
-        Write-Warn "Local source for $Skill not found at $source; skipping."
+    try {
+        $raw = npx skills ls --json 2>$null
+        if (-not [string]::IsNullOrWhiteSpace($raw)) {
+            $parsed = $raw | ConvertFrom-Json
+            $entries = @()
+            if ($parsed -is [System.Array]) {
+                $entries = $parsed
+            } elseif ($null -ne $parsed) {
+                $entries = @($parsed)
+            }
+
+            foreach ($entry in $entries) {
+                $name = $null
+                if ($entry -is [string]) {
+                    $name = $entry
+                } elseif ($entry.PSObject.Properties["name"]) {
+                    $name = [string]$entry.name
+                } elseif ($entry.PSObject.Properties["id"]) {
+                    $name = [string]$entry.id
+                } elseif ($entry.PSObject.Properties["skill"]) {
+                    $name = [string]$entry.skill
+                }
+
+                if (-not [string]::IsNullOrWhiteSpace($name)) {
+                    $map[$name] = $true
+                }
+            }
+        }
+        return @{ Success = $true; Map = $map }
+    } catch {
+        Write-Warn "Unable to list installed skills via 'npx skills ls --json'; continuing without validation."
+        return @{ Success = $false; Map = $map }
+    }
+}
+
+function Install-SkillIfNeeded {
+    param(
+        [string]$Skill,
+        [hashtable]$InstalledMap,
+        [bool]$CanValidate
+    )
+
+    if ($CanValidate -and $InstalledMap.ContainsKey($Skill)) {
+        Write-OK "$Skill already installed"
         return
     }
 
-    Write-Info "Installing $Skill from $source..."
-    Invoke-Command -Cmd { npx skills add $source --skill $Skill } -DryRun:$DryRun
+    Write-Info "Installing $Skill..."
+    Invoke-Command -Cmd { npx skills add $Skill -g -y } -DryRun:$DryRun
+
+    if ($CanValidate) {
+        $InstalledMap[$Skill] = $true
+    }
 }
 
 # Core skills (always installed)
@@ -153,8 +202,17 @@ if ($GWS) {
     $skills += $gwsSkills
 }
 
+$installedSkillState = Get-InstalledSkillMap
+$canValidateInstalledSkills = [bool]$installedSkillState.Success
+$installedSkillMap = $installedSkillState.Map
+
+if ($canValidateInstalledSkills -and $installedSkillMap.Count -gt 0) {
+    Write-Info "Installed skills detected; running 'npx skills update -g -y' before adding new skills."
+    Invoke-Command -Cmd { npx skills update -g -y } -DryRun:$DryRun -IgnoreError
+}
+
 foreach ($skill in $skills) {
-    Install-LocalSkill $skill
+    Install-SkillIfNeeded -Skill $skill -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
 }
 
 # ─────────────────────────────────────────────

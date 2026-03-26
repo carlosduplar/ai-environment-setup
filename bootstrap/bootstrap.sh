@@ -103,17 +103,80 @@ fi
 # 3. Install agent skills
 # ─────────────────────────────────────────────
 step "3/7 — Install agent skills"
-install_local_skill() {
-    local skill="$1"
-    local source="$HOME/.agents/skills/$skill"
+declare -A INSTALLED_SKILLS
+SKILL_LIST_OK=false
 
-    if [[ ! -d "$source" ]]; then
-        warn "Local source for $skill not found at $source; skipping."
+install_skill_if_needed() {
+    local skill="$1"
+    if [[ "$SKILL_LIST_OK" == "true" ]] && [[ -n "${INSTALLED_SKILLS[$skill]:-}" ]]; then
+        ok "$skill already installed"
         return
     fi
 
-    info "Installing $skill from $source..."
-    run npx skills add "$source" --skill "$skill"
+    info "Installing $skill..."
+    run npx skills add "$skill" -g -y
+
+    if [[ "$SKILL_LIST_OK" == "true" ]]; then
+        INSTALLED_SKILLS["$skill"]=1
+    fi
+}
+
+collect_installed_skills() {
+    if [[ "$DRY_RUN" == "true" ]]; then
+        info "[DRY-RUN] npx skills ls --json"
+        SKILL_LIST_OK=false
+        return
+    fi
+
+    local skills_json
+    if skills_json="$(npx skills ls --json 2>/dev/null)"; then
+        local parsed_ok=true
+        if [[ -n "$skills_json" ]]; then
+            if parsed_skill_names="$("$PYTHON_BIN" -c '
+import json
+import sys
+
+def emit_name(item):
+    if isinstance(item, str):
+        return item
+    if isinstance(item, dict):
+        for key in ("name", "id", "skill"):
+            value = item.get(key)
+            if isinstance(value, str) and value.strip():
+                return value
+    return None
+
+raw = sys.stdin.read().strip()
+if not raw:
+    raise SystemExit(0)
+
+parsed = json.loads(raw)
+if isinstance(parsed, list):
+    for entry in parsed:
+        name = emit_name(entry)
+        if name:
+            print(name)
+else:
+    name = emit_name(parsed)
+    if name:
+        print(name)
+' <<< "$skills_json" 2>/dev/null)"; then
+                while IFS= read -r skill_name; do
+                    [[ -z "$skill_name" ]] && continue
+                    INSTALLED_SKILLS["$skill_name"]=1
+                done <<< "$parsed_skill_names"
+            else
+                warn "Unable to parse installed skills from 'npx skills ls --json'; continuing without validation."
+                parsed_ok=false
+            fi
+        fi
+        if [[ "$parsed_ok" == "true" ]]; then
+            SKILL_LIST_OK=true
+        fi
+    else
+        warn "Unable to list installed skills via 'npx skills ls --json'; continuing without validation."
+        SKILL_LIST_OK=false
+    fi
 }
 
 # Core skills (always installed)
@@ -157,13 +220,22 @@ GWS_SKILLS=(
     gws-workflow-weekly-digest
 )
 
+collect_installed_skills
+
+if [[ "$SKILL_LIST_OK" == "true" ]] && (( ${#INSTALLED_SKILLS[@]} > 0 )); then
+    info "Installed skills detected; running 'npx skills update -g -y' before adding new skills."
+    if ! run npx skills update -g -y; then
+        warn "'npx skills update -g -y' failed; continuing with add flow."
+    fi
+fi
+
 for skill in "${CORE_SKILLS[@]}"; do
-    install_local_skill "$skill"
+    install_skill_if_needed "$skill"
 done
 
 if [[ "$FLAG_GWS" == "true" ]]; then
     for skill in "${GWS_SKILLS[@]}"; do
-        install_local_skill "$skill"
+        install_skill_if_needed "$skill"
     done
 fi
 

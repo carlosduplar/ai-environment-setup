@@ -141,14 +141,14 @@ config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI
 config/github-copilot/copilot-instructions.md  ──(apply)──>  ~/.copilot/copilot-instructions.md
 ```
 
-Config scaffolding is **agent-gated** — only configures tools that are already installed. Run `.\bootstrap\verify.ps1` to see which agents were detected.
+Config scaffolding is **agent-gated** — only configures tools that are already installed. Run `.\bootstrap\verify.ps1` (Windows) or `bash bootstrap/verify.sh` (Git Bash/Ubuntu WSL) to see which agents were detected.
 
 ## Update Flow
 
 1. Pull latest: `git pull`
-2. Re-run bootstrap: `.\bootstrap\bootstrap.ps1 --update`
-3. Verify: `.\bootstrap\verify.ps1`
-4. Sync any new config examples to your live config manually (never automated to avoid overwriting local state)
+2. Re-run bootstrap packages: `.\bootstrap\bootstrap.ps1 -Update` or `bash bootstrap/bootstrap.sh --update`
+3. Re-sync managed config/hooks (with backups): `.\bootstrap\bootstrap.ps1 -Overwrite` or `bash bootstrap/bootstrap.sh --overwrite`
+4. Verify: `.\bootstrap\verify.ps1` or `bash bootstrap/verify.sh`
 
 ## Security Model
 
@@ -248,7 +248,7 @@ See [hooks/README.md](hooks/README.md) and [docs/hooks-catalog.md](docs/hooks-ca
 
 ## Skills
 
-Agent skills extend AI tool capabilities. Installed via `npx skills add` from local sources.
+Agent skills extend AI tool capabilities. Bootstrap validates installed skills via `npx skills ls --json`, runs `npx skills update -g -y` when skills already exist, and adds missing skills with `npx skills add <skill-name> -g -y`.
 
 Skills are installed per the [skills catalog](skills/README.md). Google Workspace skills (`gws-*`) are gated behind the `-GWS` flag and are not installed by default.
 

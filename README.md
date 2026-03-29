@@ -82,14 +82,40 @@ Copy-Item templates\.env.example .env.local
 # 3. Run bootstrap (detects installed agents, configures them)
 .\bootstrap\bootstrap.ps1
 
-# Optional: include Google Workspace CLI + skills
-.\bootstrap\bootstrap.ps1 -GWS
-
-# Optional: include Firebase CLI
-.\bootstrap\bootstrap.ps1 -Firebase
-
 # 4. Verify everything is in place
 .\bootstrap\verify.ps1
+```
+
+### Bootstrap Options (Windows)
+
+The bootstrap script supports several optional flags:
+
+| Flag | Description |
+|------|-------------|
+| `-Update` | Re-install / upgrade existing tools and overwrite existing configs |
+| `-DryRun` | Print commands without executing (preview mode) |
+| `-Verbose` | Extra output during execution |
+| `-GWS` | Install Google Workspace CLI + skills (opt-in) |
+| `-Firebase` | Install Firebase CLI (opt-in) |
+| `-SkipVerify` | Skip automatic verification at the end |
+
+**Examples:**
+
+```powershell
+# Fresh install with all optional tools
+.\bootstrap\bootstrap.ps1 -GWS -Firebase
+
+# Update existing installation (overwrites configs, upgrades packages)
+.\bootstrap\bootstrap.ps1 -Update
+
+# Update with all optional tools
+.\bootstrap\bootstrap.ps1 -Update -GWS -Firebase
+
+# Preview what would happen without making changes
+.\bootstrap\bootstrap.ps1 -DryRun -Verbose
+
+# Quick install without final verification
+.\bootstrap\bootstrap.ps1 -SkipVerify
 ```
 
 ### Git Bash

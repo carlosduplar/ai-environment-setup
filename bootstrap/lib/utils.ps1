@@ -61,7 +61,15 @@ function Assert-EnvFile {
     $envFile = Join-Path $root ".env.local"
     
     if (-not (Test-Path $envFile)) {
-        Write-Info ".env.local not found. Create it from templates\.env.example if you need API keys."
+        # Only show message if BRIGHTDATA_API_KEY or other required keys are not set
+        $needsKeys = $false
+        if (-not [System.Environment]::GetEnvironmentVariable("BRIGHTDATA_API_KEY")) { $needsKeys = $true }
+        if (-not [System.Environment]::GetEnvironmentVariable("NVIDIA_API_KEY")) { $needsKeys = $true }
+        if (-not [System.Environment]::GetEnvironmentVariable("OPENROUTER_API_KEY")) { $needsKeys = $true }
+        
+        if ($needsKeys) {
+            Write-Warn ".env.local not found. Create it from templates\.env.example if you need API keys for optional tools."
+        }
     } else {
         # Source env vars from .env.local (key=value format, skip comments)
         Get-Content $envFile | Where-Object { $_ -notmatch "^\s*#" -and $_ -match "=" } | ForEach-Object {

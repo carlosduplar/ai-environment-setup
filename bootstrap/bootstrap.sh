@@ -139,7 +139,7 @@ install_skills_from_repo() {
     if [[ ${#skills_to_install[@]} -gt 0 ]]; then
         local skill_list="${skills_to_install[*]}"
         info "Installing skills from $repo: $skill_list"
-        run npx skills add "$repo" -skill "$skill_list" -g -y
+        run npx skills add "$repo" --skill $skill_list -g -y
 
         if [[ "$SKILL_LIST_OK" == "true" ]]; then
             for skill in "${skills_to_install[@]}"; do

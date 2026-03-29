@@ -61,12 +61,28 @@ $wingetPackages = $wingetData.Sources[0].Packages
 $totalWinget = $wingetPackages.Count
 $currentWinget = 0
 
+# Check which CLI tools are already available outside of winget
+$gitAvailable = Get-Command git -ErrorAction SilentlyContinue
+$jqAvailable = Get-Command jq -ErrorAction SilentlyContinue
+
 foreach ($pkg in $wingetPackages) {
     $currentWinget++
     $id = $pkg.PackageIdentifier
     
     # Skip Node.js if already available from another source
     if ($id -eq "OpenJS.NodeJS.LTS" -and $skipNodeInstall -and -not $Update) {
+        Write-OK "$id already available (via alternative install)"
+        continue
+    }
+    
+    # Skip git if already available (installed via Git for Windows, scoop, etc.)
+    if ($id -eq "Git.Git" -and $gitAvailable -and -not $Update) {
+        Write-OK "$id already available (via alternative install)"
+        continue
+    }
+    
+    # Skip jq if already available
+    if ($id -eq "jqlang.jq" -and $jqAvailable -and -not $Update) {
         Write-OK "$id already available (via alternative install)"
         continue
     }
@@ -272,7 +288,7 @@ $skillGroups.GetEnumerator() | ForEach-Object -Parallel {
         
         if (-not $DryRun) {
             try {
-                $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                $output = npx skills add $repo --skill $skillList -g -y 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     foreach ($skill in $skillsToInstall) {
                         [Console]::WriteLine("  [+] $skill installed")
@@ -284,7 +300,7 @@ $skillGroups.GetEnumerator() | ForEach-Object -Parallel {
                 [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
             }
         } else {
-            [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+            [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
         }
     }
 } -ThrottleLimit 3
@@ -309,7 +325,7 @@ if ($GWS) {
             
             if (-not $DryRun) {
                 try {
-                    $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                    $output = npx skills add $repo --skill $skillList -g -y 2>&1
                     if ($LASTEXITCODE -eq 0) {
                         foreach ($skill in $skillsToInstall) {
                             [Console]::WriteLine("  [+] $skill installed")
@@ -321,7 +337,7 @@ if ($GWS) {
                     [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
                 }
             } else {
-                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
             }
         }
     } -ThrottleLimit 3
@@ -412,7 +428,7 @@ if ($hasBrightDataCli) {
             
             if (-not $DryRun) {
                 try {
-                    $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                    $output = npx skills add $repo --skill $skillList -g -y 2>&1
                     if ($LASTEXITCODE -eq 0) {
                         foreach ($skill in $skillsToInstall) {
                             [Console]::WriteLine("  [+] $skill installed")
@@ -424,7 +440,7 @@ if ($hasBrightDataCli) {
                     [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
                 }
             } else {
-                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
             }
         }
     } -ThrottleLimit 1
@@ -463,7 +479,8 @@ if ($agents.opencode) {
         @{ src = "$configDir\opencode\plugins\format-on-write.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\format-on-write.js" },
         @{ src = "$configDir\opencode\plugins\notifications.js";   dst = "$env:USERPROFILE\.config\opencode\plugins\notifications.js" },
         @{ src = "$configDir\opencode\plugins\context-refresh.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\context-refresh.js" },
-        @{ src = "$configDir\opencode\plugins\session-lifecycle.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" }
+        @{ src = "$configDir\opencode\plugins\session-lifecycle.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" },
+        @{ src = "$configDir\opencode\plugins\binary-to-markdown.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\binary-to-markdown.js" }
     )
 }
 

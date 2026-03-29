@@ -1,14 +1,16 @@
 #!/usr/bin/env pwsh
 # bootstrap.ps1 — Install the full AI coding environment on Windows 11 + PowerShell 7
-# Usage: .\bootstrap\bootstrap.ps1 [-Update] [-DryRun] [-Verbose] [-GWS] [-Firebase]
+# Usage: .\bootstrap\bootstrap.ps1 [-Update] [-DryRun] [-Verbose] [-GWS] [-Firebase] [-SkipVerify]
 # Must run from repo root.
+# Precondition: Agentic coder CLIs (claude, opencode, gemini, copilot) must be pre-installed
 
 param(
-    [switch]$Update,    # Re-install / upgrade existing tools
-    [switch]$DryRun,    # Print commands without executing
-    [switch]$Verbose,   # Extra output
-    [switch]$GWS,       # Install Google Workspace CLI + skills
-    [switch]$Firebase   # Install Firebase CLI
+    [switch]$Update,      # Re-install / upgrade existing tools
+    [switch]$DryRun,      # Print commands without executing
+    [switch]$Verbose,     # Extra output
+    [switch]$GWS,         # Install Google Workspace CLI + skills
+    [switch]$Firebase,    # Install Firebase CLI
+    [switch]$SkipVerify   # Skip automatic verification at the end
 )
 
 Set-StrictMode -Version Latest
@@ -17,9 +19,12 @@ $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\lib\utils.ps1"
 
 # ─────────────────────────────────────────────
-# 0. Pre-flight
+# 0. Pre-flight checks
 # ─────────────────────────────────────────────
+Write-Step "0/8 — Pre-flight checks"
+
 Assert-PowerShellVersion 7
+Assert-WinGetAvailable
 Assert-EnvFile
 
 $root = Split-Path $PSScriptRoot -Parent
@@ -27,43 +32,80 @@ $manifestsDir = Join-Path $root "manifests"
 $configDir    = Join-Path $root "config"
 $hooksDir     = Join-Path $root "hooks"
 
-if (-not $DryRun) { . (Join-Path $root "templates\.env.example") }
+if (-not $DryRun) { 
+    $envFile = Join-Path $root ".env.local"
+    if (Test-Path $envFile) {
+        . $envFile 
+    }
+}
 
 Write-Step "Starting AI environment bootstrap (Windows 11)"
 
 # ─────────────────────────────────────────────
 # 1. Core CLIs via winget
 # ─────────────────────────────────────────────
-Write-Step "1/7 — Core CLIs (winget)"
+Write-Step "1/8 — Core CLIs (winget)"
+
+# Check Node.js availability before trying winget install
+$nodeCheck = Test-NodeJsAvailable
+if ($nodeCheck.Success) {
+    Write-OK "Node.js $($nodeCheck.NodeVersion) / npm $($nodeCheck.NpmVersion) already available"
+    $skipNodeInstall = $true
+} else {
+    Write-Info "Node.js/npm not detected, will install via winget"
+    $skipNodeInstall = $false
+}
+
 $wingetData = Get-Content (Join-Path $manifestsDir "winget.json") | ConvertFrom-Json
 $wingetPackages = $wingetData.Sources[0].Packages
+$totalWinget = $wingetPackages.Count
+$currentWinget = 0
 
 foreach ($pkg in $wingetPackages) {
+    $currentWinget++
     $id = $pkg.PackageIdentifier
+    
+    # Skip Node.js if already available from another source
+    if ($id -eq "OpenJS.NodeJS.LTS" -and $skipNodeInstall -and -not $Update) {
+        Write-OK "$id already available (via alternative install)"
+        continue
+    }
+    
     $installed = winget list --id $id --exact --accept-source-agreements 2>&1 | Select-String $id
     if ($installed -and -not $Update) {
         Write-OK "$id already installed"
     } else {
         Write-Info "Installing $id..."
-        Invoke-Command -Cmd { winget install --id $id --exact --accept-package-agreements --accept-source-agreements --silent } -DryRun:$DryRun
+        Invoke-CommandWithProgress -Activity "Installing $id" -TotalItems $totalWinget -CurrentItem $currentWinget -DryRun:$DryRun -Cmd {
+            winget install --id $id --exact --accept-package-agreements --accept-source-agreements --silent
+        }
     }
 }
 
 # ─────────────────────────────────────────────
 # 2. Node.js global packages
 # ─────────────────────────────────────────────
-Write-Step "2/7 — npm global packages"
-Assert-Command "npm" "Node.js / npm is required. Install via winget: winget install OpenJS.NodeJS"
+Write-Step "2/8 — npm global packages"
+
+# Verify npm is actually available
+if (-not (Test-NodeJsAvailable).Success) {
+    throw "Node.js / npm is required but not available even after winget install. Please install manually."
+}
 
 $npmPackages = Get-Content (Join-Path $manifestsDir "npm-global.json") | ConvertFrom-Json
+$totalNpm = $npmPackages.packages.Count
+$currentNpm = 0
 
 foreach ($pkg in $npmPackages.packages) {
+    $currentNpm++
     $installed = npm list -g --depth=0 2>$null | Select-String $pkg.name
     if ($installed -and -not $Update) {
         Write-OK "$($pkg.name) already installed"
     } else {
         Write-Info "Installing $($pkg.name)@$($pkg.version)..."
-        Invoke-Command -Cmd { npm install -g "$($pkg.name)@$($pkg.version)" } -DryRun:$DryRun
+        Invoke-CommandWithProgress -Activity "Installing $($pkg.name)" -TotalItems $totalNpm -CurrentItem $currentNpm -DryRun:$DryRun -Cmd {
+            npm install -g "$($pkg.name)@$($pkg.version)"
+        }
     }
 }
 
@@ -92,9 +134,10 @@ if ($GWS) {
 }
 
 # ─────────────────────────────────────────────
-# 3. Install agent skills
+# 3. Install agent skills (parallel by repo)
 # ─────────────────────────────────────────────
-Write-Step "3/7 — Install agent skills"
+Write-Step "3/8 — Install agent skills"
+
 function Get-InstalledSkillMap {
     $map = @{}
     if ($DryRun) {
@@ -137,59 +180,8 @@ function Get-InstalledSkillMap {
     }
 }
 
-function Install-SkillIfNeeded {
-    param(
-        [string]$Skill,
-        [hashtable]$InstalledMap,
-        [bool]$CanValidate
-    )
-
-    if ($CanValidate -and $InstalledMap.ContainsKey($Skill)) {
-        Write-OK "$Skill already installed"
-        return
-    }
-
-    Write-Info "Installing $Skill..."
-    # Individual skill install fallback (skills add supports single skill syntax too)
-    Invoke-Command -Cmd { npx skills add $Skill -g -y } -DryRun:$DryRun
-
-    if ($CanValidate) {
-        $InstalledMap[$Skill] = $true
-    }
-}
-
-function Install-SkillsFromRepo {
-    param(
-        [string]$Repo,
-        [array]$Skills,
-        [hashtable]$InstalledMap,
-        [bool]$CanValidate
-    )
-
-    $skillsToInstall = @()
-    foreach ($skill in $Skills) {
-        if ($CanValidate -and $InstalledMap.ContainsKey($skill)) {
-            Write-OK "$skill already installed"
-        } else {
-            $skillsToInstall += $skill
-        }
-    }
-
-    if ($skillsToInstall.Count -gt 0) {
-        $skillList = $skillsToInstall -join " "
-        Write-Info "Installing skills from $Repo`: $skillList"
-        Invoke-Command -Cmd { npx skills add $Repo -skill $skillList -g -y } -DryRun:$DryRun
-
-        if ($CanValidate) {
-            foreach ($skill in $skillsToInstall) {
-                $InstalledMap[$skill] = $true
-            }
-        }
-    }
-}
-
 # Core skills grouped by repository (always installed)
-$skillGroups = @{
+$skillGroups = [ordered]@{
     "anthropics/skills" = @(
         "docx",
         "pdf",
@@ -219,8 +211,17 @@ $skillGroups = @{
     )
 }
 
+# Bright Data skills (only if CLI and API key present)
+$brightDataSkillGroup = [ordered]@{
+    "brightdata/skills" = @(
+        "brightdata-cli",
+        "search",
+        "scrape"
+    )
+}
+
 # GWS skills (only with -GWS)
-$gwsSkillGroup = @{
+$gwsSkillGroup = [ordered]@{
     "googleworkspace/cli" = @(
         "gws-calendar",
         "gws-docs",
@@ -246,46 +247,119 @@ if ($canValidateInstalledSkills -and $installedSkillMap.Count -gt 0) {
     Invoke-Command -Cmd { npx skills update -g -y } -DryRun:$DryRun -IgnoreError
 }
 
-# Install skills grouped by repository
-foreach ($repo in $skillGroups.Keys) {
-    Install-SkillsFromRepo -Repo $repo -Skills $skillGroups[$repo] -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
-}
-
-# Install GWS skills if -GWS flag is set
-if ($GWS) {
-    foreach ($repo in $gwsSkillGroup.Keys) {
-        Install-SkillsFromRepo -Repo $repo -Skills $gwsSkillGroup[$repo] -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
+# Install skills in parallel by repository
+Write-Info "Installing skills from $($skillGroups.Count) repositories in parallel..."
+$skillGroups.GetEnumerator() | ForEach-Object -Parallel {
+    $repo = $_.Key
+    $skills = $_.Value
+    $DryRun = $using:DryRun
+    $installedSkillMap = $using:installedSkillMap
+    $canValidateInstalledSkills = $using:canValidateInstalledSkills
+    
+    # Inline installation logic
+    $skillsToInstall = @()
+    foreach ($skill in $skills) {
+        if ($canValidateInstalledSkills -and $installedSkillMap.ContainsKey($skill)) {
+            [Console]::WriteLine("  [+] $skill already installed")
+        } else {
+            $skillsToInstall += $skill
+        }
     }
+
+    if ($skillsToInstall.Count -gt 0) {
+        $skillList = $skillsToInstall -join " "
+        [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+        
+        if (-not $DryRun) {
+            try {
+                $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    foreach ($skill in $skillsToInstall) {
+                        [Console]::WriteLine("  [+] $skill installed")
+                    }
+                } else {
+                    [Console]::WriteLine("  [!] Failed to install skills from ${repo}: $output")
+                }
+            } catch {
+                [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
+            }
+        } else {
+            [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+        }
+    }
+} -ThrottleLimit 3
+
+# Install GWS skills if -GWS flag is set (also parallel)
+if ($GWS) {
+    Write-Info "Installing GWS skills from $($gwsSkillGroup.Count) repositories in parallel..."
+    $gwsSkillGroup.GetEnumerator() | ForEach-Object -Parallel {
+        $repo = $_.Key
+        $skills = $_.Value
+        $DryRun = $using:DryRun
+        
+        # Inline installation logic
+        $skillsToInstall = @()
+        foreach ($skill in $skills) {
+            $skillsToInstall += $skill
+        }
+
+        if ($skillsToInstall.Count -gt 0) {
+            $skillList = $skillsToInstall -join " "
+            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+            
+            if (-not $DryRun) {
+                try {
+                    $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        foreach ($skill in $skillsToInstall) {
+                            [Console]::WriteLine("  [+] $skill installed")
+                        }
+                    } else {
+                        [Console]::WriteLine("  [!] Failed to install skills from ${repo}: $output")
+                    }
+                } catch {
+                    [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
+                }
+            } else {
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+            }
+        }
+    } -ThrottleLimit 3
 }
 
 # ─────────────────────────────────────────────
 # 4. Python packages (pip)
 # ─────────────────────────────────────────────
-Write-Step "4/7 — Python packages"
+Write-Step "4/8 — Python packages"
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     Write-Warn "python not found. Skipping pip packages (markitdown will be unavailable)."
 } else {
     $pipPackages = Get-Content (Join-Path $manifestsDir "pip-packages.txt")
+    $filteredPipPackages = @($pipPackages | Where-Object { $_ -notmatch "^#" -and -not [string]::IsNullOrWhiteSpace($_) })
+    $totalPip = $filteredPipPackages.Count
+    $currentPip = 0
 
-    foreach ($pkg in $pipPackages) {
+    foreach ($pkg in $filteredPipPackages) {
         $pkg = $pkg.Trim()
-        if ($pkg -match "^#" -or [string]::IsNullOrWhiteSpace($pkg)) { continue }
+        $currentPip++
         Write-Info "Ensuring $pkg..."
-        Invoke-Command -Cmd { python -m pip install --user $pkg } -DryRun:$DryRun
+        Invoke-CommandWithProgress -Activity "Installing $pkg" -TotalItems $totalPip -CurrentItem $currentPip -DryRun:$DryRun -Cmd {
+            python -m pip install --user $pkg
+        }
     }
 }
 
 # ─────────────────────────────────────────────
 # 5. Detect agents
 # ─────────────────────────────────────────────
-Write-Step "5/7 — Detect agents"
+Write-Step "5/8 — Detect agents"
 
 $agents = @{}
 $agentList = @(
     @{ name = "claude";    cmd = "claude" },
     @{ name = "opencode";  cmd = "opencode" },
     @{ name = "gemini";    cmd = "gemini" },
-    @{ name = "copilot";   cmd = "gh-copilot" }
+    @{ name = "copilot";   cmd = "copilot" }
 )
 
 foreach ($agent in $agentList) {
@@ -299,9 +373,69 @@ foreach ($agent in $agentList) {
 }
 
 # ─────────────────────────────────────────────
+# 5b. Detect optional CLIs (API-key gated)
+# ─────────────────────────────────────────────
+Write-Step "6/8 — Optional CLIs"
+
+# Check for Bright Data API key and CLI
+$brightDataApiKey = [System.Environment]::GetEnvironmentVariable("BRIGHTDATA_API_KEY")
+$hasBrightDataCli = $false
+
+if (-not [string]::IsNullOrWhiteSpace($brightDataApiKey)) {
+    if (Get-Command "brightdata" -ErrorAction SilentlyContinue) {
+        Write-OK "brightdata CLI found"
+        $hasBrightDataCli = $true
+    } else {
+        Write-Warn "brightdata CLI not found — Bright Data skills will be skipped"
+    }
+} else {
+    Write-Info "BRIGHTDATA_API_KEY not set — skipping Bright Data CLI and skills"
+}
+
+# ── Optional: Bright Data skills ──────────────────────
+if ($hasBrightDataCli) {
+    Write-Step "Optional — Bright Data skills"
+    Write-Info "Installing Bright Data skills..."
+    $brightDataSkillGroup.GetEnumerator() | ForEach-Object -Parallel {
+        $repo = $_.Key
+        $skills = $_.Value
+        $DryRun = $using:DryRun
+        
+        $skillsToInstall = @()
+        foreach ($skill in $skills) {
+            $skillsToInstall += $skill
+        }
+
+        if ($skillsToInstall.Count -gt 0) {
+            $skillList = $skillsToInstall -join " "
+            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+            
+            if (-not $DryRun) {
+                try {
+                    $output = npx skills add $repo -skill $skillList -g -y 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        foreach ($skill in $skillsToInstall) {
+                            [Console]::WriteLine("  [+] $skill installed")
+                        }
+                    } else {
+                        [Console]::WriteLine("  [!] Failed to install skills from ${repo}: $output")
+                    }
+                } catch {
+                    [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
+                }
+            } else {
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo -skill $skillList -g -y")
+            }
+        }
+    } -ThrottleLimit 1
+} else {
+    Write-Info "Bright Data CLI not available — skipping Bright Data skills"
+}
+
+# ─────────────────────────────────────────────
 # 6. Config scaffolding (agent-gated)
 # ─────────────────────────────────────────────
-Write-Step "6/7 — Config scaffolding"
+Write-Step "7/8 — Config scaffolding"
 
 # Always copy shared config
 $sharedConfigs = @()
@@ -349,15 +483,18 @@ if ($agents.copilot) {
     )
 }
 
+$totalConfigs = $sharedConfigs.Count
+$currentConfig = 0
+
 foreach ($cfg in $sharedConfigs) {
+    $currentConfig++
     if (Test-Path $cfg.dst) {
         Write-OK "$($cfg.dst) already exists — skipping (use -Update to overwrite)"
         if ($Update) {
             Write-Info "Backing up and overwriting $($cfg.dst)..."
             if (-not $DryRun) {
-                $backup = "$($cfg.dst).backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-                Copy-Item $cfg.dst $backup
-                Copy-Item $cfg.src $cfg.dst
+                Backup-And-CopyFile -Source $cfg.src -Destination $cfg.dst -DryRun:$DryRun
+                Write-OK "$($cfg.dst) updated (backup created)"
             }
         }
     } else {
@@ -368,10 +505,12 @@ foreach ($cfg in $sharedConfigs) {
             Copy-Item $cfg.src $cfg.dst
         }
     }
+    Write-Progress -Activity "Config scaffolding" -Status "$currentConfig of $totalConfigs" -PercentComplete ([math]::Round(($currentConfig / $totalConfigs) * 100))
 }
+Write-Progress -Activity "Config scaffolding" -Completed
 
 # ─────────────────────────────────────────────
-# Done
+# 7. Done — Auto-run verification
 # ─────────────────────────────────────────────
 Write-Host ""
 Write-Host "Bootstrap complete." -ForegroundColor Green
@@ -379,4 +518,14 @@ Write-Host "Agents configured: $(($agents.GetEnumerator() | Where-Object { $_.Va
 if (($agents.GetEnumerator() | Where-Object { -not $_.Value })) {
     Write-Host "Agents skipped:   $(($agents.GetEnumerator() | Where-Object { -not $_.Value }).Name -join ', ')" -ForegroundColor Yellow
 }
-Write-Host "Next: fill in .env.local with your API keys, then run .\bootstrap\verify.ps1"
+
+# Auto-run verification unless -SkipVerify was passed
+if (-not $SkipVerify) {
+    Write-Host ""
+    Write-Host "Running automatic verification..." -ForegroundColor Cyan
+    & "$PSScriptRoot\verify.ps1"
+    exit $LASTEXITCODE
+} else {
+    Write-Host "Verification skipped (use -SkipVerify to bypass automatic verification)" -ForegroundColor Yellow
+    Write-Host "Run .\bootstrap\verify.ps1 to verify your installation."
+}

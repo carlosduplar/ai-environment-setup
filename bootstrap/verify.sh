@@ -33,7 +33,7 @@ has_opencode=false
 has_gemini=false
 has_copilot=false
 
-for pair in "claude:has_claude" "opencode:has_opencode" "gemini:has_gemini" "gh-copilot:has_copilot"; do
+for pair in "claude:has_claude" "opencode:has_opencode" "gemini:has_gemini" "copilot:has_copilot"; do
     cmd="${pair%%:*}"
     var="${pair##*:}"
     if command -v "$cmd" &>/dev/null; then
@@ -45,9 +45,26 @@ for pair in "claude:has_claude" "opencode:has_opencode" "gemini:has_gemini" "gh-
 done
 
 # ─────────────────────────────────────────────
-# 3. Optional tools
+# 3. Optional tools (API-key gated)
 # ─────────────────────────────────────────────
 step "3/5 — Optional tools"
+
+# Check which API keys are available
+has_brightdata_key=false
+[[ -n "${BRIGHTDATA_API_KEY:-}" ]] && has_brightdata_key=true
+
+# Bright Data CLI - only check if API key is present
+if [[ "$has_brightdata_key" == "true" ]]; then
+    if command -v brightdata &>/dev/null; then
+        ok "brightdata found"
+    else
+        info "brightdata not found (optional)"
+    fi
+else
+    info "BRIGHTDATA_API_KEY not set — skipping Bright Data CLI check"
+fi
+
+# Other optional tools
 for tool in python ctx7 playwright npx gcloud firebase gws markitdown; do
     if command -v "$tool" &>/dev/null; then
         ok "$tool found"
@@ -110,10 +127,8 @@ check_file "$ROOT/.github/hooks/hooks.json" "Copilot repo hook config"
 # 5. Environment variables
 # ─────────────────────────────────────────────
 step "5/5 — Environment variables"
-for v in ANTHROPIC_AUTH_TOKEN BRIGHTDATA_API_KEY GITHUB_TOKEN; do
-    check_env "$v"
-done
-for v in NVIDIA_API_KEY OPENROUTER_API_KEY MISTRAL_API_KEY; do
+# Note: ANTHROPIC_AUTH_TOKEN is managed by the Claude Code CLI itself
+for v in BRIGHTDATA_API_KEY NVIDIA_API_KEY OPENROUTER_API_KEY MISTRAL_API_KEY GOOGLE_CLOUD_PROJECT; do
     [[ -n "${!v:-}" ]] && ok "$v set" || info "$v not set (optional)"
 done
 

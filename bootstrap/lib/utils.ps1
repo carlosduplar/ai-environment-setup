@@ -42,11 +42,26 @@ function Assert-Command([string]$name, [string]$hint = "") {
     }
 }
 
+function Test-NodeJsAvailable {
+    # Check if Node.js and npm are actually functional
+    try {
+        $nodeVer = & node --version 2>$null
+        $npmVer = & npm --version 2>$null
+        if ($nodeVer -and $npmVer) {
+            return @{ Success = $true; NodeVersion = $nodeVer; NpmVersion = $npmVer }
+        }
+    } catch {
+        # Fall through to failure
+    }
+    return @{ Success = $false }
+}
+
 function Assert-EnvFile {
-    $envFile = Join-Path (Split-Path $PSScriptRoot -Parent) ".env.local"
+    $root = Split-Path $PSScriptRoot -Parent
+    $envFile = Join-Path $root ".env.local"
+    
     if (-not (Test-Path $envFile)) {
-        Write-Warn ".env.local not found. Copy templates\.env.example to .env.local and fill in your secrets."
-        Write-Warn "Some tools may not work without their API keys."
+        Write-Info ".env.local not found. Create it from templates\.env.example if you need API keys."
     } else {
         # Source env vars from .env.local (key=value format, skip comments)
         Get-Content $envFile | Where-Object { $_ -notmatch "^\s*#" -and $_ -match "=" } | ForEach-Object {
@@ -57,20 +72,94 @@ function Assert-EnvFile {
     }
 }
 
+function Assert-WinGetAvailable {
+    $wingetCmd = Get-Command winget -ErrorAction SilentlyContinue
+    if (-not $wingetCmd) {
+        throw "winget not found. Please install winget or App Installer from Microsoft Store."
+    }
+    
+    # Test if winget can run without admin (it will fail on some restricted systems)
+    try {
+        $testOutput = winget --version 2>&1
+        if ($LASTEXITCODE -ne 0 -and $testOutput -match "admin") {
+            Write-Warn "winget may require administrator privileges for some operations."
+        }
+    } catch {
+        throw "winget is not functional. Error: $_"
+    }
+    
+    Write-OK "winget available"
+}
+
 function Invoke-Command {
     param(
         [scriptblock]$Cmd,
         [switch]$DryRun,
-        [switch]$IgnoreError
+        [switch]$IgnoreError,
+        [string]$Activity = "Running command"
     )
     if ($DryRun) {
         Write-Info "[DRY-RUN] $Cmd"
         return
     }
+    
     try {
         & $Cmd
     } catch {
         if (-not $IgnoreError) { throw }
         Write-Warn "Non-fatal error: $_"
+    }
+}
+
+function Invoke-CommandWithProgress {
+    param(
+        [scriptblock]$Cmd,
+        [string]$Activity,
+        [int]$TotalItems = 1,
+        [int]$CurrentItem = 1,
+        [switch]$DryRun,
+        [switch]$IgnoreError
+    )
+    
+    if ($DryRun) {
+        Write-Info "[DRY-RUN] $Activity"
+        return
+    }
+    
+    $percent = [math]::Round(($CurrentItem / $TotalItems) * 100)
+    Write-Progress -Activity $Activity -Status "$CurrentItem of $TotalItems" -PercentComplete $percent
+    
+    try {
+        & $Cmd
+    } catch {
+        if (-not $IgnoreError) { 
+            Write-Progress -Activity $Activity -Completed
+            throw 
+        }
+        Write-Warn "Non-fatal error: $_"
+    } finally {
+        Write-Progress -Activity $Activity -Completed
+    }
+}
+
+function Backup-And-CopyFile {
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [switch]$DryRun
+    )
+    
+    if (-not $DryRun) {
+        $dstDir = Split-Path $Destination
+        if (-not (Test-Path $dstDir)) { 
+            New-Item -ItemType Directory -Path $dstDir -Force | Out-Null 
+        }
+        
+        if (Test-Path $Destination) {
+            $backup = "$Destination.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+            Copy-Item $Destination $backup -Force
+        }
+        
+        Copy-Item $Source $Destination -Force
     }
 }

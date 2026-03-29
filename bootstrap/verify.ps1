@@ -49,19 +49,25 @@ function Test-File {
 }
 
 function Test-EnvVar {
-    param([string]$Name)
+    param([string]$Name, [switch]$Required)
     $val = [System.Environment]::GetEnvironmentVariable($Name)
     if ([string]::IsNullOrWhiteSpace($val)) {
-        Write-Warn "$Name — not set"
+        if ($Required) {
+            Write-Fail "$Name — not set (required)"
+        } else {
+            Write-Warn "$Name — not set"
+        }
+        return $false
     } else {
         Write-OK "$Name — set (${val.Length} chars)"
+        return $true
     }
 }
 
 # ─────────────────────────────────────────────
 # 1. Core tools
 # ─────────────────────────────────────────────
-Write-Step "1/5 — Core tools"
+Write-Step "1/6 — Core tools"
 Test-Tool "git"
 Test-Tool "node"
 Test-Tool "npm"
@@ -73,16 +79,29 @@ Test-Tool "curl"
 # ─────────────────────────────────────────────
 # 2. AI agents (optional)
 # ─────────────────────────────────────────────
-Write-Step "2/5 — AI agents"
+Write-Step "2/6 — AI agents"
 $hasClaude   = Test-OptionalTool "claude"
 $hasOpenCode = Test-OptionalTool "opencode"
 $hasGemini   = Test-OptionalTool "gemini"
-$hasCopilot  = Test-OptionalTool "gh-copilot"
+$hasCopilot  = Test-OptionalTool "copilot"
 
 # ─────────────────────────────────────────────
-# 3. Optional tools
+# 3. Optional tools (API-key gated)
 # ─────────────────────────────────────────────
-Write-Step "3/5 — Optional tools"
+Write-Step "3/6 — Optional tools"
+
+# Check which API keys are available
+$hasBrightDataKey = Test-EnvVar "BRIGHTDATA_API_KEY"
+$hasNvidiaKey     = Test-EnvVar "NVIDIA_API_KEY"
+
+# Bright Data CLI - only check if API key is present
+if ($hasBrightDataKey) {
+    Test-OptionalTool "brightdata" | Out-Null
+} else {
+    Write-Info "BRIGHTDATA_API_KEY not set — skipping Bright Data CLI check"
+}
+
+# Other optional tools
 Test-OptionalTool "python"      | Out-Null
 Test-OptionalTool "ctx7"        | Out-Null
 Test-OptionalTool "playwright"  | Out-Null
@@ -95,7 +114,7 @@ Test-OptionalTool "markitdown"  | Out-Null
 # ─────────────────────────────────────────────
 # 4. Config files (agent-gated)
 # ─────────────────────────────────────────────
-Write-Step "4/5 — Config & hooks"
+Write-Step "4/6 — Config & hooks"
 
 if ($hasClaude) {
     Test-File "$env:USERPROFILE\.claude\settings.json" "Claude Code settings"
@@ -145,18 +164,19 @@ Test-File "$root\.github\hooks\hooks.json" "Copilot repo hook config"
 # ─────────────────────────────────────────────
 # 5. Environment variables
 # ─────────────────────────────────────────────
-Write-Step "5/5 — Environment variables"
-$requiredEnvVars = @(
-    "ANTHROPIC_AUTH_TOKEN",
-    "BRIGHTDATA_API_KEY",
-    "GITHUB_TOKEN"
-)
+Write-Step "5/6 — Environment variables"
+
+# Required env vars
+# Note: ANTHROPIC_AUTH_TOKEN is not checked here - if claude CLI works, authentication is handled
+
+# Optional env vars  
 $optionalEnvVars = @(
     "NVIDIA_API_KEY",
     "OPENROUTER_API_KEY",
-    "MISTRAL_API_KEY"
+    "MISTRAL_API_KEY",
+    "BRIGHTDATA_API_KEY",
+    "GOOGLE_CLOUD_PROJECT"
 )
-foreach ($v in $requiredEnvVars) { Test-EnvVar $v }
 foreach ($v in $optionalEnvVars) {
     $val = [System.Environment]::GetEnvironmentVariable($v)
     if ([string]::IsNullOrWhiteSpace($val)) {
@@ -167,10 +187,10 @@ foreach ($v in $optionalEnvVars) {
 }
 
 # ─────────────────────────────────────────────
-# Security scan (optional)
+# 6. Security scan (optional)
 # ─────────────────────────────────────────────
 if ($Security) {
-    Write-Step "Security — scanning for accidental secrets"
+    Write-Step "6/6 — Security scan"
     $patterns = @(
         'sk-[a-zA-Z0-9]{32,}',          # Anthropic keys
         'nvapi-[a-zA-Z0-9_-]{40,}',     # NVIDIA keys

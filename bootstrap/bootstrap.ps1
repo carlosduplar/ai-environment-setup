@@ -150,6 +150,7 @@ function Install-SkillIfNeeded {
     }
 
     Write-Info "Installing $Skill..."
+    # Individual skill install fallback (skills add supports single skill syntax too)
     Invoke-Command -Cmd { npx skills add $Skill -g -y } -DryRun:$DryRun
 
     if ($CanValidate) {
@@ -157,49 +158,83 @@ function Install-SkillIfNeeded {
     }
 }
 
-# Core skills (always installed)
-$skills = @(
-    "brand-guidelines",
-    "canvas-design",
-    "context7-cli",
-    "doc-coauthoring",
-    "docx",
-    "find-docs",
-    "find-skills",
-    "frontend-design",
-    "gh-cli",
-    "mcp-builder",
-    "pdf",
-    "playwright-cli",
-    "pptx",
-    "seo-audit",
-    "skill-creator",
-    "vercel-react-best-practices",
-    "vercel-react-native-skills",
-    "web-artifacts-builder",
-    "web-design-guidelines",
-    "webapp-testing",
-    "xlsx"
-)
+function Install-SkillsFromRepo {
+    param(
+        [string]$Repo,
+        [array]$Skills,
+        [hashtable]$InstalledMap,
+        [bool]$CanValidate
+    )
+
+    $skillsToInstall = @()
+    foreach ($skill in $Skills) {
+        if ($CanValidate -and $InstalledMap.ContainsKey($skill)) {
+            Write-OK "$skill already installed"
+        } else {
+            $skillsToInstall += $skill
+        }
+    }
+
+    if ($skillsToInstall.Count -gt 0) {
+        $skillList = $skillsToInstall -join " "
+        Write-Info "Installing skills from $Repo`: $skillList"
+        Invoke-Command -Cmd { npx skills add $Repo -skill $skillList -g -y } -DryRun:$DryRun
+
+        if ($CanValidate) {
+            foreach ($skill in $skillsToInstall) {
+                $InstalledMap[$skill] = $true
+            }
+        }
+    }
+}
+
+# Core skills grouped by repository (always installed)
+$skillGroups = @{
+    "anthropics/skills" = @(
+        "docx",
+        "pdf",
+        "pptx", 
+        "xlsx",
+        "webapp-testing",
+        "frontend-design",
+        "skill-creator"
+    )
+    "vercel-labs/agent-skills" = @(
+        "vercel-react-best-practices",
+        "vercel-react-native-skills",
+        "web-design-guidelines"
+    )
+    "vercel-labs/skills" = @(
+        "find-skills"
+    )
+    "coreyhaines31/marketingskills" = @(
+        "seo-audit"
+    )
+    "microsoft/playwright-cli" = @(
+        "playwright-cli"
+    )
+    "upstash/context7" = @(
+        "context7-cli",
+        "find-docs"
+    )
+}
 
 # GWS skills (only with -GWS)
-$gwsSkills = @(
-    "gws-calendar",
-    "gws-docs",
-    "gws-drive",
-    "gws-gmail",
-    "gws-keep",
-    "gws-shared",
-    "gws-sheets",
-    "gws-tasks",
-    "gws-workflow-email-to-task",
-    "gws-workflow-meeting-prep",
-    "gws-workflow-standup-report",
-    "gws-workflow-weekly-digest"
-)
-
-if ($GWS) {
-    $skills += $gwsSkills
+$gwsSkillGroup = @{
+    "googleworkspace/cli" = @(
+        "gws-calendar",
+        "gws-docs",
+        "gws-drive",
+        "gws-gmail",
+        "gws-keep",
+        "gws-shared",
+        "gws-sheets",
+        "gws-tasks",
+        "gws-workflow-email-to-task",
+        "gws-workflow-meeting-prep",
+        "gws-workflow-standup-report",
+        "gws-workflow-weekly-digest"
+    )
 }
 
 $installedSkillState = Get-InstalledSkillMap
@@ -211,8 +246,16 @@ if ($canValidateInstalledSkills -and $installedSkillMap.Count -gt 0) {
     Invoke-Command -Cmd { npx skills update -g -y } -DryRun:$DryRun -IgnoreError
 }
 
-foreach ($skill in $skills) {
-    Install-SkillIfNeeded -Skill $skill -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
+# Install skills grouped by repository
+foreach ($repo in $skillGroups.Keys) {
+    Install-SkillsFromRepo -Repo $repo -Skills $skillGroups[$repo] -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
+}
+
+# Install GWS skills if -GWS flag is set
+if ($GWS) {
+    foreach ($repo in $gwsSkillGroup.Keys) {
+        Install-SkillsFromRepo -Repo $repo -Skills $gwsSkillGroup[$repo] -InstalledMap $installedSkillMap -CanValidate $canValidateInstalledSkills
+    }
 }
 
 # ─────────────────────────────────────────────

@@ -114,10 +114,38 @@ install_skill_if_needed() {
     fi
 
     info "Installing $skill..."
+    # Individual skill install fallback
     run npx skills add "$skill" -g -y
 
     if [[ "$SKILL_LIST_OK" == "true" ]]; then
         INSTALLED_SKILLS["$skill"]=1
+    fi
+}
+
+install_skills_from_repo() {
+    local repo="$1"
+    shift
+    local skills=("$@")
+    local skills_to_install=()
+
+    for skill in "${skills[@]}"; do
+        if [[ "$SKILL_LIST_OK" == "true" ]] && [[ -n "${INSTALLED_SKILLS[$skill]:-}" ]]; then
+            ok "$skill already installed"
+        else
+            skills_to_install+=("$skill")
+        fi
+    done
+
+    if [[ ${#skills_to_install[@]} -gt 0 ]]; then
+        local skill_list="${skills_to_install[*]}"
+        info "Installing skills from $repo: $skill_list"
+        run npx skills add "$repo" -skill "$skill_list" -g -y
+
+        if [[ "$SKILL_LIST_OK" == "true" ]]; then
+            for skill in "${skills_to_install[@]}"; do
+                INSTALLED_SKILLS["$skill"]=1
+            done
+        fi
     fi
 }
 
@@ -179,45 +207,19 @@ else:
     fi
 }
 
-# Core skills (always installed)
-CORE_SKILLS=(
-    brand-guidelines
-    canvas-design
-    context7-cli
-    doc-coauthoring
-    docx
-    find-docs
-    find-skills
-    frontend-design
-    gh-cli
-    mcp-builder
-    pdf
-    playwright-cli
-    pptx
-    seo-audit
-    skill-creator
-    vercel-react-best-practices
-    vercel-react-native-skills
-    web-artifacts-builder
-    web-design-guidelines
-    webapp-testing
-    xlsx
+# Core skills grouped by repository (always installed)
+declare -A SKILL_REPOS=(
+    ["anthropics/skills"]="docx pdf pptx xlsx webapp-testing frontend-design skill-creator"
+    ["vercel-labs/agent-skills"]="vercel-react-best-practices vercel-react-native-skills web-design-guidelines"
+    ["vercel-labs/skills"]="find-skills"
+    ["coreyhaines31/marketingskills"]="seo-audit"
+    ["microsoft/playwright-cli"]="playwright-cli"
+    ["upstash/context7"]="context7-cli find-docs"
 )
 
 # GWS skills (only with --gws)
-GWS_SKILLS=(
-    gws-calendar
-    gws-docs
-    gws-drive
-    gws-gmail
-    gws-keep
-    gws-shared
-    gws-sheets
-    gws-tasks
-    gws-workflow-email-to-task
-    gws-workflow-meeting-prep
-    gws-workflow-standup-report
-    gws-workflow-weekly-digest
+declare -A GWS_SKILL_REPOS=(
+    ["googleworkspace/cli"]="gws-calendar gws-docs gws-drive gws-gmail gws-keep gws-shared gws-sheets gws-tasks gws-workflow-email-to-task gws-workflow-meeting-prep gws-workflow-standup-report gws-workflow-weekly-digest"
 )
 
 collect_installed_skills
@@ -229,13 +231,17 @@ if [[ "$SKILL_LIST_OK" == "true" ]] && (( ${#INSTALLED_SKILLS[@]} > 0 )); then
     fi
 fi
 
-for skill in "${CORE_SKILLS[@]}"; do
-    install_skill_if_needed "$skill"
+# Install core skills grouped by repository
+for repo in "${!SKILL_REPOS[@]}"; do
+    read -ra skills_array <<< "${SKILL_REPOS[$repo]}"
+    install_skills_from_repo "$repo" "${skills_array[@]}"
 done
 
+# Install GWS skills if --gws flag is set
 if [[ "$FLAG_GWS" == "true" ]]; then
-    for skill in "${GWS_SKILLS[@]}"; do
-        install_skill_if_needed "$skill"
+    for repo in "${!GWS_SKILL_REPOS[@]}"; do
+        read -ra skills_array <<< "${GWS_SKILL_REPOS[$repo]}"
+        install_skills_from_repo "$repo" "${skills_array[@]}"
     done
 fi
 

@@ -59,7 +59,7 @@ function Test-EnvVar {
         }
         return $false
     } else {
-        Write-OK "$Name — set (${val.Length} chars)"
+        Write-OK "$Name — set ($($val.Length) chars)"
         return $true
     }
 }

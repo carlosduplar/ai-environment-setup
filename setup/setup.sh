@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# bootstrap.sh — Install the full AI coding environment (Git Bash on Windows 11)
-# Usage: bash bootstrap/bootstrap.sh [--update] [--dry-run] [--gws] [--firebase]
+# setup.sh — Install the full AI coding environment (Git Bash on Windows 11)
+# Usage: bash setup/setup.sh [--update] [--dry-run] [--gws] [--firebase]
 
 set -euo pipefail
 
@@ -24,7 +24,7 @@ for arg in "$@"; do
     esac
 done
 
-# shellcheck source=bootstrap/lib/utils.sh
+# shellcheck source=setup/lib/utils.sh
 source "$SCRIPT_DIR/lib/utils.sh"
 
 # ─────────────────────────────────────────────
@@ -308,6 +308,8 @@ if [[ "${AGENTS[opencode]}" == "true" ]]; then
     CONFIGS["$CONFIG/opencode/plugins/notifications.js"]="$HOME_DIR/.config/opencode/plugins/notifications.js"
     CONFIGS["$CONFIG/opencode/plugins/context-refresh.js"]="$HOME_DIR/.config/opencode/plugins/context-refresh.js"
     CONFIGS["$CONFIG/opencode/plugins/session-lifecycle.js"]="$HOME_DIR/.config/opencode/plugins/session-lifecycle.js"
+    CONFIGS["$CONFIG/opencode/plugins/binary-to-markdown.js"]="$HOME_DIR/.config/opencode/plugins/binary-to-markdown.js"
+    CONFIGS["$CONFIG/opencode/plugins/permission-logger.js"]="$HOME_DIR/.config/opencode/plugins/permission-logger.js"
 fi
 
 # Gemini config + hooks
@@ -349,4 +351,5 @@ echo "Agents configured: $(for name in "${!AGENTS[@]}"; do [[ "${AGENTS[$name]}"
 for name in "${!AGENTS[@]}"; do
     [[ "${AGENTS[$name]}" == "false" ]] && echo "Agents skipped:   $name"
 done
-echo "Next: fill .env.local, then run: bash bootstrap/verify.sh"
+echo "Next: fill .env.local, then run: bash setup/verify.sh"
+echo "Tip: Run bash setup/analyze-permission-log.sh to see which commands you can auto-allow."

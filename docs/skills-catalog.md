@@ -57,4 +57,4 @@ npx skills update -g -y
 npx skills add <skill-name> -g -y
 ```
 
-See bootstrap scripts for the full list of skills installed in this environment.
+See setup scripts for the full list of skills installed in this environment.

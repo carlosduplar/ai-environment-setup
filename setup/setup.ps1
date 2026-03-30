@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
-# bootstrap.ps1 — Install the full AI coding environment on Windows 11 + PowerShell 7
-# Usage: .\bootstrap\bootstrap.ps1 [-Update] [-DryRun] [-Verbose] [-GWS] [-Firebase] [-SkipVerify]
+# setup.ps1 — Install the full AI coding environment on Windows 11 + PowerShell 7
+# Usage: .\setup\setup.ps1 [-Update] [-DryRun] [-Verbose] [-GWS] [-Firebase] [-SkipVerify]
 # Must run from repo root.
 # Precondition: Agentic coder CLIs (claude, opencode, gemini, copilot) must be pre-installed
 
@@ -39,7 +39,7 @@ if (-not $DryRun) {
     }
 }
 
-Write-Step "Starting AI environment bootstrap (Windows 11)"
+Write-Step "Starting AI environment setup (Windows 11)"
 
 # ─────────────────────────────────────────────
 # 1. Core CLIs via winget
@@ -480,7 +480,8 @@ if ($agents.opencode) {
         @{ src = "$configDir\opencode\plugins\notifications.js";   dst = "$env:USERPROFILE\.config\opencode\plugins\notifications.js" },
         @{ src = "$configDir\opencode\plugins\context-refresh.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\context-refresh.js" },
         @{ src = "$configDir\opencode\plugins\session-lifecycle.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" },
-        @{ src = "$configDir\opencode\plugins\binary-to-markdown.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\binary-to-markdown.js" }
+        @{ src = "$configDir\opencode\plugins\binary-to-markdown.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\binary-to-markdown.js" },
+        @{ src = "$configDir\opencode\plugins\permission-logger.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\permission-logger.js" }
     )
 }
 
@@ -544,5 +545,6 @@ if (-not $SkipVerify) {
     exit $LASTEXITCODE
 } else {
     Write-Host "Verification skipped (use -SkipVerify to bypass automatic verification)" -ForegroundColor Yellow
-    Write-Host "Run .\bootstrap\verify.ps1 to verify your installation."
+    Write-Host "Run .\setup\verify.ps1 to verify your installation."
+    Write-Host "Run .\setup\analyze-permission-log.ps1 to see which commands you can auto-allow."
 }

@@ -4,7 +4,7 @@
 
 This repository contains **public-safe configuration scaffolding** only:
 - Example config files with placeholder values
-- Bootstrap and verification scripts
+- Setup and verification scripts
 - Documentation and catalogs
 
 ## What This Repository Must Never Contain
@@ -22,7 +22,7 @@ This repository contains **public-safe configuration scaffolding** only:
 
 Before committing any config file:
 
-1. Run `bootstrap/verify.ps1 --security` to scan for common secret patterns.
+1. Run `setup/verify.ps1 --security` to scan for common secret patterns.
 2. Replace all tokens matching these patterns with environment variable references:
 
 ```

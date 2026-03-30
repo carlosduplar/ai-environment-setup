@@ -17,7 +17,7 @@ Skills are activated by name in the Copilot CLI or Claude Code session. For alwa
 
 See [catalog/](catalog/) for all skill definitions.
 
-Skills marked with **-GWS** require the `-GWS` bootstrap flag (includes `@googleworkspace/cli`).
+Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googleworkspace/cli`).
 
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|

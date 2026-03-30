@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# utils.sh — Shared helpers for bootstrap shell scripts
+# utils.sh — Shared helpers for setup shell scripts
 
 _pass=0
 _fail=0

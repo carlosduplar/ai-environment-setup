@@ -41,12 +41,12 @@ jobs:
             ".gitignore"
             "setup-report.md"
             "templates/.env.example"
-            "bootstrap/bootstrap.ps1"
-            "bootstrap/bootstrap.sh"
-            "bootstrap/verify.ps1"
-            "bootstrap/verify.sh"
-            "bootstrap/lib/utils.ps1"
-            "bootstrap/lib/utils.sh"
+            "setup/setup.ps1"
+            "setup/setup.sh"
+            "setup/verify.ps1"
+            "setup/verify.sh"
+            "setup/lib/utils.ps1"
+            "setup/lib/utils.sh"
             "manifests/npm-global.json"
             "manifests/pip-packages.txt"
             "manifests/winget.json"
@@ -123,5 +123,5 @@ jobs:
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
-          scandir: './bootstrap'
+          scandir: './setup'
           severity: warning

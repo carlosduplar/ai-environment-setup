@@ -1,4 +1,4 @@
-# utils.ps1 — Shared helpers for bootstrap scripts
+# utils.ps1 — Shared helpers for setup scripts
 
 $script:_pass = 0
 $script:_fail = 0

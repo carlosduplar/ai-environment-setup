@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # verify.sh — Assert the AI environment is correctly installed
-# Usage: bash bootstrap/verify.sh [--security]
+# Usage: bash setup/verify.sh [--security]
 
 set -uo pipefail
 
@@ -12,7 +12,7 @@ for arg in "$@"; do
     [[ "$arg" == "--security" ]] && SECURITY=true
 done
 
-# shellcheck source=bootstrap/lib/utils.sh
+# shellcheck source=setup/lib/utils.sh
 source "$SCRIPT_DIR/lib/utils.sh"
 
 # ─────────────────────────────────────────────

@@ -6,7 +6,7 @@ A **public template repository** capturing a reproducible AI coding environment 
 
 - Documents every CLI tool and its install source
 - Provides safe, secret-free config scaffolding for OpenCode, Claude Code, Gemini CLI, GitHub Copilot CLI
-- Ships bootstrap scripts to install everything from scratch
+- Ships setup scripts to install everything from scratch
 - Ships verify scripts to assert a machine is in the expected state
 - Catalogs shared skills and hooks
 
@@ -52,7 +52,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the current CLI inventory
 
 ```
 ai-environment-setup/
-├── bootstrap/          # Install + verify scripts
+├── setup/          # Install + verify scripts
 ├── manifests/          # Package inventories (npm, pip, winget)
 ├── dotfiles/           # Shell and git config examples
 ├── config/ # AI tool config scaffolding (no secrets)
@@ -79,16 +79,16 @@ cd ai-environment-setup
 Copy-Item templates\.env.example .env.local
 # Edit .env.local with your actual API keys — never commit this file
 
-# 3. Run bootstrap (detects installed agents, configures them)
-.\bootstrap\bootstrap.ps1
+# 3. Run setup (detects installed agents, configures them)
+.\setup\setup.ps1
 
 # 4. Verify everything is in place
-.\bootstrap\verify.ps1
+.\setup\verify.ps1
 ```
 
-### Bootstrap Options (Windows)
+### Setup Options (Windows)
 
-The bootstrap script supports several optional flags:
+The setup script supports several optional flags:
 
 | Flag | Description |
 |------|-------------|
@@ -103,19 +103,19 @@ The bootstrap script supports several optional flags:
 
 ```powershell
 # Fresh install with all optional tools
-.\bootstrap\bootstrap.ps1 -GWS -Firebase
+.\setup\setup.ps1 -GWS -Firebase
 
 # Update existing installation (overwrites configs, upgrades packages)
-.\bootstrap\bootstrap.ps1 -Update
+.\setup\setup.ps1 -Update
 
 # Update with all optional tools
-.\bootstrap\bootstrap.ps1 -Update -GWS -Firebase
+.\setup\setup.ps1 -Update -GWS -Firebase
 
 # Preview what would happen without making changes
-.\bootstrap\bootstrap.ps1 -DryRun -Verbose
+.\setup\setup.ps1 -DryRun -Verbose
 
 # Quick install without final verification
-.\bootstrap\bootstrap.ps1 -SkipVerify
+.\setup\setup.ps1 -SkipVerify
 ```
 
 ### Git Bash
@@ -126,13 +126,13 @@ cd ai-environment-setup
 cp templates/.env.example .env.local
 # Edit .env.local
 
-# Run bootstrap (detects installed agents, configures them)
-bash bootstrap/bootstrap.sh
+# Run setup (detects installed agents, configures them)
+bash setup/setup.sh
 
 # Optional flags
-bash bootstrap/bootstrap.sh --gws --firebase
+bash setup/setup.sh --gws --firebase
 
-bash bootstrap/verify.sh
+bash setup/verify.sh
 ```
 
 ## Tool Inventory
@@ -167,14 +167,14 @@ config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI
 config/github-copilot/copilot-instructions.md  ──(apply)──>  ~/.copilot/copilot-instructions.md
 ```
 
-Config scaffolding is **agent-gated** — only configures tools that are already installed. Run `.\bootstrap\verify.ps1` (Windows) or `bash bootstrap/verify.sh` (Git Bash/Ubuntu WSL) to see which agents were detected.
+Config scaffolding is **agent-gated** — only configures tools that are already installed. Run `.\setup\verify.ps1` (Windows) or `bash setup/verify.sh` (Git Bash/Ubuntu WSL) to see which agents were detected.
 
 ## Update Flow
 
 1. Pull latest: `git pull`
-2. Re-run bootstrap packages: `.\bootstrap\bootstrap.ps1 -Update` or `bash bootstrap/bootstrap.sh --update`
-3. Re-sync managed config/hooks (with backups): `.\bootstrap\bootstrap.ps1 -Overwrite` or `bash bootstrap/bootstrap.sh --overwrite`
-4. Verify: `.\bootstrap\verify.ps1` or `bash bootstrap/verify.sh`
+2. Re-run setup packages: `.\setup\setup.ps1 -Update` or `bash setup/setup.sh --update`
+3. Re-sync managed config/hooks (with backups): `.\setup\setup.ps1 -Overwrite` or `bash setup/setup.sh --overwrite`
+4. Verify: `.\setup\verify.ps1` or `bash setup/verify.sh`
 
 ## Security Model
 
@@ -302,7 +302,7 @@ See [docs/skills-catalog.md](docs/skills-catalog.md) for installed skills.
 
 ## Contributing
 
-This is a personal environment template. PRs that add cross-platform support (macOS/Linux) or improve the bootstrap scripts are welcome. See [SECURITY.md](SECURITY.md) before submitting.
+This is a personal environment template. PRs that add cross-platform support (macOS/Linux) or improve the setup scripts are welcome. See [SECURITY.md](SECURITY.md) before submitting.
 
 ## License
 

@@ -10,7 +10,7 @@ Machine-readable inventories of every package this environment depends on.
 
 ## Updating manifests
 
-When you install a new tool, add it to the appropriate manifest so the bootstrap scripts pick it up:
+When you install a new tool, add it to the appropriate manifest so the setup scripts pick it up:
 
 ```powershell
 # Snapshot current npm globals to see what's installed

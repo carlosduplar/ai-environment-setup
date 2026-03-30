@@ -16,7 +16,7 @@ Complete reference for every CLI in this environment.
 
 ## AI Coding Agents (detected, not installed)
 
-These agents are **detected** by bootstrap — if present, their config and hooks are scaffolded. If absent, bootstrap warns and skips.
+These agents are **detected** by setup — if present, their config and hooks are scaffolded. If absent, setup warns and skips.
 
 ### Claude Code
 - **CLI**: `claude`
@@ -75,7 +75,7 @@ These agents are **detected** by bootstrap — if present, their config and hook
 ### Python
 - **CLI**: `python`, `pip`
 - **Install**: W — `winget install Python.Python.3` (only if no python exists)
-- **Notes**: Installed by bootstrap only when python is not already present
+- **Notes**: Installed by setup only when python is not already present
 
 ---
 
@@ -121,7 +121,7 @@ These agents are **detected** by bootstrap — if present, their config and hook
 
 ## Optional Tools (flag-gated)
 
-These are NOT installed by default. Use bootstrap flags to opt in.
+These are NOT installed by default. Use setup flags to opt in.
 
 ### Firebase CLI (`-Firebase`)
 - **CLI**: `firebase`

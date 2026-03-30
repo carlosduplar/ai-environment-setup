@@ -4,7 +4,7 @@ Step-by-step guide to migrate your current Windows 11 machine state into this re
 
 ## Phase 1 — Audit current state
 
-- [ ] Run `.\bootstrap\verify.ps1` on your current machine to get a baseline
+- [ ] Run `.\setup\verify.ps1` on your current machine to get a baseline
 - [ ] Export current winget packages: `winget export --output manifests/winget.json`
 - [ ] List current npm globals: `npm list -g --depth=0`
 - [ ] List current uv tools: `uv tool list`
@@ -27,7 +27,7 @@ For each config file you want to add:
 Run the security check before each commit:
 
 ```powershell
-.\bootstrap\verify.ps1 -Security
+.\setup\verify.ps1 -Security
 ```
 
 ## Phase 3 — Move system prompt / rules
@@ -57,7 +57,7 @@ code .env.local  # edit
 Verify all required keys are set:
 
 ```powershell
-.\bootstrap\verify.ps1
+.\setup\verify.ps1
 ```
 
 ## Phase 6 — Initialize the repo
@@ -77,8 +77,8 @@ The real test is applying this to a fresh Windows 11 install:
 
 1. Clone repo
 2. Copy and fill `.env.local`
-3. Run `.\bootstrap\bootstrap.ps1`
-4. Run `.\bootstrap\verify.ps1`
+3. Run `.\setup\setup.ps1`
+4. Run `.\setup\verify.ps1`
 5. Fill in `setup-report.md`
 
 ## Known gaps / TODOs
@@ -87,4 +87,4 @@ The real test is applying this to a fresh Windows 11 install:
 
 - [ ] Add per-skill `.md` files for all 37 skills (currently only `context7.md` is included)
 - [ ] Add `dotnet-tools.json` manifest if .NET global tools are added
-- [ ] Add macOS/Linux bootstrap scripts
+- [ ] Add macOS/Linux setup scripts

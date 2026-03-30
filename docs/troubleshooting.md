@@ -82,7 +82,7 @@ gws auth login
 
 ---
 
-## bootstrap.ps1
+## setup.ps1
 
 ### "winget not found"
 winget ships with Windows 11. On older systems: install from https://aka.ms/getwinget
@@ -92,7 +92,7 @@ winget ships with Windows 11. On older systems: install from https://aka.ms/getw
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-### Tool installs but CLI not found after bootstrap
+### Tool installs but CLI not found after setup
 Open a new PowerShell window — PATH changes require a new session.
 
 ---
@@ -107,10 +107,10 @@ Get-Content "$PWD\.env.local" | Select-Object -First 10
 ```
 
 ### Config file missing
-Re-run bootstrap with `-Update` flag:
+Re-run setup with `-Update` flag:
 
 ```powershell
-.\bootstrap\bootstrap.ps1 -Update
+.\setup\setup.ps1 -Update
 ```
 
 ---

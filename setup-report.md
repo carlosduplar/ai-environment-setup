@@ -9,15 +9,15 @@ Fill this out after applying the environment on a new machine.
 - **PowerShell version**: <!-- pwsh --version -->
 - **Git Bash version**: <!-- bash --version -->
 
-## Bootstrap Result
+## Setup Result
 
-- [ ] `bootstrap.ps1` completed without errors
+- [ ] `setup.ps1` completed without errors
 - [ ] `verify.ps1` passed all checks
 - [ ] `.env.local` populated with all required keys
 
 ## Tools Installed
 
-Run `bootstrap\verify.ps1` and paste output here:
+Run `setup\verify.ps1` and paste output here:
 
 ```
 <!-- paste verify output -->

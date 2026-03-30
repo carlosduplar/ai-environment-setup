@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # verify.ps1 — Assert the AI environment is correctly installed
-# Usage: .\bootstrap\verify.ps1 [-Security] [-Fix]
+# Usage: .\setup\verify.ps1 [-Security] [-Fix]
 # Exit code: 0 = all pass, 1 = failures found
 
 param(

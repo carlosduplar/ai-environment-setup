@@ -40,11 +40,11 @@ These agents are **detected** by setup — if present, their config and hooks ar
 - **Docs**: https://github.com/google-gemini/gemini-cli
 
 ### GitHub Copilot CLI
-- **CLI**: `gh copilot`
+- **CLI**: `copilot`
 - **Install**: GH — `gh extension install github/gh-copilot`
 - **Config**: `~/.copilot/`
 - **Auth**: `gh auth login` → `GITHUB_TOKEN`
-- **Docs**: https://docs.github.com/copilot/using-github-copilot/using-github-copilot-in-the-command-line
+- **Docs**: https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-copilot-cli
 
 ---
 

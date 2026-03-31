@@ -25,19 +25,11 @@ Write-Step "0/8 — Pre-flight checks"
 
 Assert-PowerShellVersion 7
 Assert-WinGetAvailable
-Assert-EnvFile
 
 $root = Split-Path $PSScriptRoot -Parent
 $manifestsDir = Join-Path $root "manifests"
 $configDir    = Join-Path $root "config"
 $hooksDir     = Join-Path $root "hooks"
-
-if (-not $DryRun) { 
-    $envFile = Join-Path $root ".env.local"
-    if (Test-Path $envFile) {
-        . $envFile 
-    }
-}
 
 Write-Step "Starting AI environment setup (Windows 11)"
 

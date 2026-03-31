@@ -1,3 +1,8 @@
+# Documentation
+- Read `AI_QUICKREF.md` if exists (30 sec context load)
+- Missing? Invoke `/quick-docs` skill → 2 min setup
+- Update when: conventions change, blocker discovered, architecture shift
+
 # Principles
 - KISS, YAGNI, DRY. Less is more. Avoid unnecessary complexity, features, and abstractions. Over-engineering is the enemy of progress.
 - No emojis in code or comments.

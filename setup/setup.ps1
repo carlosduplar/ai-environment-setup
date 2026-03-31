@@ -26,6 +26,14 @@ Write-Step "0/8 — Pre-flight checks"
 Assert-PowerShellVersion 7
 Assert-WinGetAvailable
 
+# Pre-load PowerShell Archive module to prevent Expand-Archive failures in npm post-install scripts
+try {
+    Import-Module Microsoft.PowerShell.Archive -Force -ErrorAction SilentlyContinue
+    Write-OK "PowerShell Archive module ready"
+} catch {
+    Write-Warn "Microsoft.PowerShell.Archive module could not be loaded. Some npm installs may fail."
+}
+
 $root = Split-Path $PSScriptRoot -Parent
 $manifestsDir = Join-Path $root "manifests"
 $configDir    = Join-Path $root "config"
@@ -132,12 +140,28 @@ if ($Firebase) {
 # ── Optional: Google Workspace ──────────────────────
 if ($GWS) {
     Write-Step "Optional — Google Workspace CLI"
+    
+    # Pre-load the Archive module to prevent Expand-Archive failures during npm install
+    try {
+        Import-Module Microsoft.PowerShell.Archive -Force -ErrorAction SilentlyContinue
+        Write-Info "PowerShell Archive module loaded"
+    } catch {
+        Write-Warn "Could not pre-load Microsoft.PowerShell.Archive module. Install may fail."
+    }
+    
     $installed = npm list -g --depth=0 2>$null | Select-String "@googleworkspace/cli"
     if ($installed -and -not $Update) {
         Write-OK "@googleworkspace/cli already installed"
     } else {
         Write-Info "Installing @googleworkspace/cli..."
-        Invoke-Command -Cmd { npm install -g "@googleworkspace/cli" } -DryRun:$DryRun
+        try {
+            Invoke-Command -Cmd { npm install -g "@googleworkspace/cli" } -DryRun:$DryRun
+            Write-OK "@googleworkspace/cli installed"
+        } catch {
+            Write-Warn "Failed to install @googleworkspace/cli. This is often due to PowerShell module issues."
+            Write-Info "Workaround: Download the binary directly from https://github.com/googleworkspace/cli/releases"
+            Write-Info "Or run: Import-Module Microsoft.PowerShell.Archive; npm install -g @googleworkspace/cli"
+        }
     }
 }
 

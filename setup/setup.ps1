@@ -478,7 +478,8 @@ if ($agents.opencode) {
         @{ src = "$configDir\opencode\plugins\context-refresh.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\context-refresh.js" },
         @{ src = "$configDir\opencode\plugins\session-lifecycle.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\session-lifecycle.js" },
         @{ src = "$configDir\opencode\plugins\binary-to-markdown.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\binary-to-markdown.js" },
-        @{ src = "$configDir\opencode\plugins\permission-logger.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\permission-logger.js" }
+        @{ src = "$configDir\opencode\plugins\permission-logger.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\permission-logger.js" },
+        @{ src = "$configDir\opencode\plugins\shell-detector.js"; dst = "$env:USERPROFILE\.config\opencode\plugins\shell-detector.js" }
     )
 }
 

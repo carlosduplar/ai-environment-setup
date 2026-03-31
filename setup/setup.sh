@@ -310,6 +310,7 @@ if [[ "${AGENTS[opencode]}" == "true" ]]; then
     CONFIGS["$CONFIG/opencode/plugins/session-lifecycle.js"]="$HOME_DIR/.config/opencode/plugins/session-lifecycle.js"
     CONFIGS["$CONFIG/opencode/plugins/binary-to-markdown.js"]="$HOME_DIR/.config/opencode/plugins/binary-to-markdown.js"
     CONFIGS["$CONFIG/opencode/plugins/permission-logger.js"]="$HOME_DIR/.config/opencode/plugins/permission-logger.js"
+    CONFIGS["$CONFIG/opencode/plugins/shell-detector.js"]="$HOME_DIR/.config/opencode/plugins/shell-detector.js"
 fi
 
 # Gemini config + hooks

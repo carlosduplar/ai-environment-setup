@@ -160,7 +160,7 @@ if ($GWS) {
         } catch {
             Write-Warn "Failed to install @googleworkspace/cli. This is often due to PowerShell module issues."
             Write-Info "Workaround: Download the binary directly from https://github.com/googleworkspace/cli/releases"
-            Write-Info "Or run: Import-Module Microsoft.PowerShell.Archive; npm install -g @googleworkspace/cli"
+            Write-Info "Or run: Import-Module Microsoft.PowerShell.Archive; npm install -g '@googleworkspace/cli'"
         }
     }
 }

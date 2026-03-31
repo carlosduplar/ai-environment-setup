@@ -113,6 +113,10 @@ function Invoke-Command {
     
     try {
         & $Cmd
+        # Check $LASTEXITCODE for native commands (npm, git, etc.)
+        if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
+            throw "Command failed with exit code $LASTEXITCODE"
+        }
     } catch {
         if (-not $IgnoreError) { throw }
         Write-Warn "Non-fatal error: $_"
@@ -139,6 +143,10 @@ function Invoke-CommandWithProgress {
     
     try {
         & $Cmd
+        # Check $LASTEXITCODE for native commands (npm, git, etc.)
+        if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
+            throw "Command failed with exit code $LASTEXITCODE"
+        }
     } catch {
         if (-not $IgnoreError) { 
             Write-Progress -Activity $Activity -Completed

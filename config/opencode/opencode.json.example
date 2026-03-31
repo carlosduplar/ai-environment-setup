@@ -4,18 +4,14 @@
     "*": "ask",
     "read": "allow",
     "edit": "ask",
-    "write": "ask",
     "glob": "allow",
     "grep": "allow",
+    "list": "allow",
     "todowrite": "allow",
     "skill": "allow",
-    "task": "allow",
     "question": "allow",
     "webfetch": "allow",
     "websearch": "allow",
-    "codesearch": "allow",
-    "external_directory": "ask",
-    "doom_loop": "ask",
     "bash": {
       "*": "ask",
       "rm *": "deny",
@@ -103,11 +99,9 @@
       "reasoningEffort": "high",
       "permission": {
         "edit": "deny",
-        "write": "deny",
         "bash": "deny",
         "webfetch": "ask",
-        "websearch": "ask",
-        "codesearch": "ask"
+        "websearch": "ask"
       }
     },
     "auto": {
@@ -116,9 +110,7 @@
       "reasoningEffort": "high",
       "permission": {
         "edit": "allow",
-        "write": "allow",
-        "webfetch": "ask",
-        "codesearch": "ask"
+        "webfetch": "ask"
       }
     },
     "build": {
@@ -127,9 +119,7 @@
       "reasoningEffort": "high",
       "permission": {
         "edit": "ask",
-        "write": "ask",
-        "webfetch": "ask",
-        "codesearch": "ask"
+        "webfetch": "ask"
       }
     }
   },

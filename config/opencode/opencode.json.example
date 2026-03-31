@@ -103,6 +103,7 @@
       "reasoningEffort": "high",
       "permission": {
         "edit": "deny",
+        "write": "deny",
         "bash": "deny",
         "webfetch": "ask",
         "websearch": "ask",
@@ -114,7 +115,6 @@
       "temperature": 0.3,
       "reasoningEffort": "high",
       "permission": {
-        "*": "ask",
         "edit": "allow",
         "write": "allow",
         "webfetch": "ask",
@@ -126,7 +126,6 @@
       "temperature": 0.3,
       "reasoningEffort": "high",
       "permission": {
-        "*": "ask",
         "edit": "ask",
         "write": "ask",
         "webfetch": "ask",

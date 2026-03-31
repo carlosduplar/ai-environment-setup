@@ -105,6 +105,7 @@
       "npm list*": "allow",
       "npm view*": "allow",
       "npx --version*": "allow",
+      "npx ctx7@latest*": "allow",
       "python --version*": "allow",
       "python -V*": "allow",
       "pip list*": "allow",
@@ -144,6 +145,8 @@
       "firebase apps:list*": "allow",
       "firebase hosting:channel:list*": "allow",
       "firebase functions:list*": "allow",
+      "firebase --version*": "allow",
+      "firebase help*": "allow",
       "gws*": "allow"
     }
   },

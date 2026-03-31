@@ -283,12 +283,11 @@ $skillGroups.GetEnumerator() | ForEach-Object -Parallel {
     }
 
     if ($skillsToInstall.Count -gt 0) {
-        $skillList = $skillsToInstall -join " "
-        [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+        [Console]::WriteLine("  [ ] Installing skills from ${repo}: $($skillsToInstall -join ', ')")
         
         if (-not $DryRun) {
             try {
-                $output = npx skills add $repo --skill $skillList -g -y 2>&1
+                $output = npx skills add $repo --skill @skillsToInstall -g -y 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     foreach ($skill in $skillsToInstall) {
                         [Console]::WriteLine("  [+] $skill installed")
@@ -300,7 +299,7 @@ $skillGroups.GetEnumerator() | ForEach-Object -Parallel {
                 [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
             }
         } else {
-            [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
+            [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill @skillsToInstall -g -y")
         }
     }
 } -ThrottleLimit 3
@@ -320,12 +319,11 @@ if ($GWS) {
         }
 
         if ($skillsToInstall.Count -gt 0) {
-            $skillList = $skillsToInstall -join " "
-            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $($skillsToInstall -join ', ')")
             
             if (-not $DryRun) {
                 try {
-                    $output = npx skills add $repo --skill $skillList -g -y 2>&1
+                    $output = npx skills add $repo --skill @skillsToInstall -g -y 2>&1
                     if ($LASTEXITCODE -eq 0) {
                         foreach ($skill in $skillsToInstall) {
                             [Console]::WriteLine("  [+] $skill installed")
@@ -337,7 +335,7 @@ if ($GWS) {
                     [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
                 }
             } else {
-                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill @skillsToInstall -g -y")
             }
         }
     } -ThrottleLimit 3
@@ -423,12 +421,11 @@ if ($hasBrightDataCli) {
         }
 
         if ($skillsToInstall.Count -gt 0) {
-            $skillList = $skillsToInstall -join " "
-            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $skillList")
+            [Console]::WriteLine("  [ ] Installing skills from ${repo}: $($skillsToInstall -join ', ')")
             
             if (-not $DryRun) {
                 try {
-                    $output = npx skills add $repo --skill $skillList -g -y 2>&1
+                    $output = npx skills add $repo --skill @skillsToInstall -g -y 2>&1
                     if ($LASTEXITCODE -eq 0) {
                         foreach ($skill in $skillsToInstall) {
                             [Console]::WriteLine("  [+] $skill installed")
@@ -440,7 +437,7 @@ if ($hasBrightDataCli) {
                     [Console]::WriteLine("  [!] Error installing skills from ${repo}: $_")
                 }
             } else {
-                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill $skillList -g -y")
+                [Console]::WriteLine("  [ ] [DRY-RUN] npx skills add $repo --skill @skillsToInstall -g -y")
             }
         }
     } -ThrottleLimit 1

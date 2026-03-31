@@ -310,7 +310,6 @@ if [[ "${AGENTS[opencode]}" == "true" ]]; then
     CONFIGS["$CONFIG/opencode/plugins/context-refresh.js"]="$HOME_DIR/.config/opencode/plugins/context-refresh.js"
     CONFIGS["$CONFIG/opencode/plugins/session-lifecycle.js"]="$HOME_DIR/.config/opencode/plugins/session-lifecycle.js"
     CONFIGS["$CONFIG/opencode/plugins/binary-to-markdown.js"]="$HOME_DIR/.config/opencode/plugins/binary-to-markdown.js"
-    CONFIGS["$CONFIG/opencode/plugins/permission-logger.js"]="$HOME_DIR/.config/opencode/plugins/permission-logger.js"
     CONFIGS["$CONFIG/opencode/plugins/shell-detector.js"]="$HOME_DIR/.config/opencode/plugins/shell-detector.js"
 fi
 
@@ -354,4 +353,3 @@ for name in "${!AGENTS[@]}"; do
     [[ "${AGENTS[$name]}" == "false" ]] && echo "Agents skipped:   $name"
 done
 echo "Next: fill .env.local, then run: bash setup/verify.sh"
-echo "Tip: Run bash setup/analyze-permission-log.sh to see which commands you can auto-allow."

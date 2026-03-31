@@ -217,6 +217,9 @@ $skillGroups = [ordered]@{
         "context7-cli",
         "find-docs"
     )
+    "brianlovin/claude-config" = @(
+        "simplify"
+    )
 }
 
 # Bright Data skills (only if CLI and API key present)

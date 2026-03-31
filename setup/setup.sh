@@ -91,11 +91,90 @@ fi
 # ── Optional: Google Workspace ──────────────────────
 if [[ "$FLAG_GWS" == "true" ]]; then
     step "Optional — Google Workspace CLI"
-    if npm list -g @googleworkspace/cli &>/dev/null && [[ "$UPDATE" == "false" ]]; then
-        ok "@googleworkspace/cli already installed"
+    
+    # Check if already installed via npm or directly available
+    if (command -v gws &>/dev/null) || (npm list -g @googleworkspace/cli &>/dev/null); then
+        if [[ "$UPDATE" == "false" ]]; then
+            ok "@googleworkspace/cli already installed"
+        else
+            info "Updating @googleworkspace/cli..."
+            # Try npm update first
+            if ! run npm install -g "@googleworkspace/cli@latest"; then
+                warn "npm update failed. Manual update may be required."
+            fi
+        fi
     else
         info "Installing @googleworkspace/cli..."
-        run npm install -g "@googleworkspace/cli"
+        
+        # Try npm install first
+        if ! run npm install -g "@googleworkspace/cli"; then
+            warn "npm install failed. Attempting manual installation..."
+            
+            # Manual installation fallback for systems where npm post-install scripts fail
+            GWS_VERSION="0.22.5"
+            GWS_DIR="$HOME/.npm-global/lib/node_modules/@googleworkspace/cli"
+            
+            # Detect OS and architecture
+            OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+            ARCH=$(uname -m)
+            
+            case "$ARCH" in
+                x86_64) ARCH="x86_64" ;;
+                aarch64|arm64) ARCH="aarch64" ;;
+                *) warn "Unknown architecture: $ARCH. Attempting x86_64..."; ARCH="x86_64" ;;
+            esac
+            
+            case "$OS" in
+                darwin) PLATFORM="apple-darwin" ;;
+                linux) PLATFORM="unknown-linux-gnu" ;;
+                msys*|mingw*|cygwin*) PLATFORM="pc-windows-msvc" ;;
+                *) warn "Unknown platform: $OS. Skipping manual install."; PLATFORM="" ;;
+            esac
+            
+            if [[ -n "$PLATFORM" ]]; then
+                ZIP_NAME="google-workspace-cli-${ARCH}-${PLATFORM}.zip"
+                ZIP_URL="https://github.com/googleworkspace/cli/releases/download/v${GWS_VERSION}/${ZIP_NAME}"
+                TEMP_DIR=$(mktemp -d)
+                
+                info "Downloading from $ZIP_URL..."
+                if curl -fsSL "$ZIP_URL" -o "$TEMP_DIR/gws.zip" 2>/dev/null || wget -q "$ZIP_URL" -O "$TEMP_DIR/gws.zip" 2>/dev/null; then
+                    info "Extracting..."
+                    if unzip -q "$TEMP_DIR/gws.zip" -d "$TEMP_DIR"; then
+                        mkdir -p "$GWS_DIR/bin"
+                        cp "$TEMP_DIR/gws" "$GWS_DIR/bin/gws" 2>/dev/null || cp "$TEMP_DIR/gws.exe" "$GWS_DIR/bin/gws.exe" 2>/dev/null
+                        chmod +x "$GWS_DIR/bin/gws" 2>/dev/null || true
+                        
+                        # Create package.json
+                        cat > "$GWS_DIR/package.json" << 'EOF'
+{
+  "name": "@googleworkspace/cli",
+  "version": "0.22.5",
+  "bin": {
+    "gws": "./bin/gws"
+  }
+}
+EOF
+                        
+                        # Create symlink in npm bin directory
+                        NPM_BIN=$(npm bin -g 2>/dev/null || echo "$HOME/.npm-global/bin")
+                        mkdir -p "$NPM_BIN"
+                        ln -sf "$GWS_DIR/bin/gws" "$NPM_BIN/gws" 2>/dev/null || true
+                        
+                        if command -v gws &>/dev/null; then
+                            ok "@googleworkspace/cli installed manually ($(gws --version 2>/dev/null || echo 'unknown'))"
+                        else
+                            warn "Manual installation completed but gws not in PATH. Add $GWS_DIR/bin to your PATH."
+                        fi
+                    else
+                        warn "Failed to extract archive"
+                    fi
+                else
+                    warn "Failed to download from $ZIP_URL"
+                fi
+                
+                rm -rf "$TEMP_DIR"
+            fi
+        fi
     fi
 fi
 

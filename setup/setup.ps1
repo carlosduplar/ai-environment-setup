@@ -141,26 +141,92 @@ if ($Firebase) {
 if ($GWS) {
     Write-Step "Optional — Google Workspace CLI"
     
-    # Pre-load the Archive module to prevent Expand-Archive failures during npm install
-    try {
-        Import-Module Microsoft.PowerShell.Archive -Force -ErrorAction SilentlyContinue
-        Write-Info "PowerShell Archive module loaded"
-    } catch {
-        Write-Warn "Could not pre-load Microsoft.PowerShell.Archive module. Install may fail."
-    }
+    # Check if already installed
+    $gwsInstalled = Get-Command gws -ErrorAction SilentlyContinue
+    $npmInstalled = npm list -g --depth=0 2>$null | Select-String "@googleworkspace/cli"
     
-    $installed = npm list -g --depth=0 2>$null | Select-String "@googleworkspace/cli"
-    if ($installed -and -not $Update) {
+    if (($gwsInstalled -or $npmInstalled) -and -not $Update) {
         Write-OK "@googleworkspace/cli already installed"
     } else {
         Write-Info "Installing @googleworkspace/cli..."
+        
+        # Try npm install first, but it often fails due to PowerShell Archive module issues
+        # So we use a manual fallback that mimics what the npm package would do
         try {
             Invoke-Command -Cmd { npm install -g "@googleworkspace/cli" } -DryRun:$DryRun
-            Write-OK "@googleworkspace/cli installed"
+            Write-OK "@googleworkspace/cli installed via npm"
         } catch {
-            Write-Warn "Failed to install @googleworkspace/cli. This is often due to PowerShell module issues."
-            Write-Info "Workaround: Download the binary directly from https://github.com/googleworkspace/cli/releases"
-            Write-Info "Or run: Import-Module Microsoft.PowerShell.Archive; npm install -g '@googleworkspace/cli'"
+            Write-Warn "npm install failed (PowerShell Archive module issue). Using manual installation..."
+            
+            if (-not $DryRun) {
+                # Manual installation workaround
+                $gwsVersion = "0.22.5"
+                $tempDir = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "gws-install-$(Get-Random)")
+                $zipUrl = "https://github.com/googleworkspace/cli/releases/download/v$gwsVersion/google-workspace-cli-x86_64-pc-windows-msvc.zip"
+                
+                try {
+                    # Create directories
+                    $gwsDir = Join-Path $env:APPDATA "npm\node_modules\@googleworkspace\cli"
+                    $binDir = Join-Path $gwsDir "bin"
+                    New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+                    
+                    # Download using .NET (more reliable than Invoke-WebRequest in some environments)
+                    $zipPath = Join-Path $tempDir "gws.zip"
+                    New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+                    
+                    $webClient = New-Object System.Net.WebClient
+                    $webClient.DownloadFile($zipUrl, $zipPath)
+                    
+                    # Extract using .NET (bypasses PowerShell Archive module issues)
+                    Add-Type -AssemblyName System.IO.Compression.FileSystem
+                    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $tempDir)
+                    
+                    # Copy gws.exe to bin directory
+                    $extractedExe = Join-Path $tempDir "gws.exe"
+                    Copy-Item $extractedExe "$binDir\gws.exe" -Force
+                    
+                    # Create package.json for npm tracking
+                    $packageJson = @{
+                        name = "@googleworkspace/cli"
+                        version = $gwsVersion
+                        bin = @{ gws = "./bin/gws.exe" }
+                    } | ConvertTo-Json -Depth 3
+                    $packageJson | Out-File (Join-Path $gwsDir "package.json") -Encoding utf8
+                    
+                    # Create npm bin wrapper (gws.cmd)
+                    $cmdWrapper = '@ECHO off
+SETLOCAL
+CALL :find_dp0
+"%~dp0\node_modules\@googleworkspace\cli\bin\gws.exe" %*
+EXIT /b
+:find_dp0
+SET dp0=%~dp0
+EXIT /b'
+                    $cmdWrapper | Out-File (Join-Path $env:APPDATA "npm\gws.cmd") -Encoding ascii
+                    
+                    # Create PowerShell wrapper (gws.ps1)
+                    $psWrapper = '#!/usr/bin/env pwsh
+$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
+$exe="$basedir\node_modules\@googleworkspace\cli\bin\gws.exe"
+& $exe @args'
+                    $psWrapper | Out-File (Join-Path $env:APPDATA "npm\gws.ps1") -Encoding utf8
+                    
+                    # Verify installation
+                    if (Get-Command gws -ErrorAction SilentlyContinue) {
+                        $version = gws --version 2>$null
+                        Write-OK "@googleworkspace/cli installed manually ($version)"
+                    } else {
+                        throw "Installation verification failed"
+                    }
+                } finally {
+                    # Cleanup temp directory
+                    if (Test-Path $tempDir) {
+                        Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+                    }
+                }
+            } else {
+                Write-Info "[DRY-RUN] Would manually install @googleworkspace/cli to $env:APPDATA\npm\node_modules\@googleworkspace\cli"
+            }
         }
     }
 }

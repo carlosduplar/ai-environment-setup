@@ -101,7 +101,7 @@ These agents are **detected** by setup — if present, their config and hooks ar
 - **CLI**: `markitdown`
 - **Install**: P — `pip install markitdown`
 - **Docs**: https://github.com/microsoft/markitdown
-- **Notes**: Converts PDF, DOCX, XLSX, images → Markdown. Requires python + pip.
+- **Notes**: Converts PDF, DOCX, XLSX, images → Markdown. Requires python + pip. **Auto-skipped on Termux** (not supported on Android).
 
 ---
 

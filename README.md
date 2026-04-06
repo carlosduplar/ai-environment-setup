@@ -16,6 +16,7 @@ A **public template repository** capturing a reproducible AI coding environment 
 |----------|--------|
 | Windows 11 + PowerShell 7 | Primary target |
 | Windows 11 + Git Bash | Supported |
+| Termux (Android) | Supported — markitdown features auto-skipped |
 | macOS | Planned |
 | Linux | Planned |
 
@@ -148,6 +149,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 | Playwright CLI | Browser automation | `npm install -g @playwright/cli` | Per-project |
 | Context7 (ctx7) | Fetch current library docs | `npm -g ctx7` | Per-project |
 | markitdown | Convert documents to Markdown | `pip install markitdown` | None |
+| | **Note:** Auto-skipped on Termux (not supported) | | |
 | gh | GitHub CLI | `winget install GitHub.cli` | `~/.config/gh/` |
 | Firebase CLI | Firebase project management | `-Firebase` flag (opt-in) | `~/.config/configstore/` |
 | gws | Google Workspace CLI | `-GWS` flag (opt-in) | `~/.config/gws/` |
@@ -236,11 +238,13 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 
 ### Binary-to-Markdown Hook Package
 
-- Location: `hooks/binary-to-markdown/`
-- Purpose: Convert supported binary files (`.pdf`, `.docx`, `.xlsx`, `.xls`, `.pptx`, `.ppt`, `.epub`, `.ipynb`) to Markdown before model ingestion
-- Core converter: `hooks/binary-to-markdown/convert.py` (markitdown primary + optional Mistral OCR fallback for poor PDF extraction)
-- OpenCode integration: `config/opencode/plugins/binary-to-markdown.js`
-- Limitation: `.doc` is excluded (legacy binary Word format is not reliably supported by `markitdown`)
+- **Location**: `hooks/binary-to-markdown/`
+- **Purpose**: Convert supported binary files (`.pdf`, `.docx`, `.xlsx`, `.xls`, `.pptx`, `.ppt`, `.epub`, `.ipynb`) to Markdown before model ingestion
+- **Core converter**: `hooks/binary-to-markdown/convert.py` (markitdown primary + optional Mistral OCR fallback for poor PDF extraction)
+- **OpenCode integration**: `config/opencode/plugins/binary-to-markdown.js`
+- **Limitations**:
+  - `.doc` is excluded (legacy binary Word format is not reliably supported by `markitdown`)
+  - **Skipped on Termux** — `markitdown` is not supported on Android/Termux environments
 
 ### What the Hooks Do
 

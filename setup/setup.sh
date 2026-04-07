@@ -337,7 +337,6 @@ declare -A SKILL_REPOS=(
     ["coreyhaines31/marketingskills"]="seo-audit"
     ["microsoft/playwright-cli"]="playwright-cli"
     ["upstash/context7"]="context7-cli find-docs"
-    ["brianlovin/claude-config"]="simplify"
 )
 
 # GWS skills (only with --gws)

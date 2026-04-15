@@ -309,17 +309,14 @@ $skillGroups = [ordered]@{
         "playwright-cli"
     )
     "upstash/context7" = @(
-        "context7-cli",
-        "find-docs"
+        "context7-cli"
     )
 }
 
 # Bright Data skills (only if CLI and API key present)
 $brightDataSkillGroup = [ordered]@{
     "brightdata/skills" = @(
-        "brightdata-cli",
-        "search",
-        "scrape"
+        "brightdata-cli"
     )
 }
 

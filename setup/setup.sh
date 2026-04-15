@@ -336,7 +336,7 @@ declare -A SKILL_REPOS=(
     ["vercel-labs/skills"]="find-skills"
     ["coreyhaines31/marketingskills"]="seo-audit"
     ["microsoft/playwright-cli"]="playwright-cli"
-    ["upstash/context7"]="context7-cli find-docs"
+    ["upstash/context7"]="context7-cli"
 )
 
 # GWS skills (only with --gws)

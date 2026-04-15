@@ -22,12 +22,10 @@ Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googlework
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|
 | brand-guidelines | No | Anthropic brand colors and typography |
-| canvas-design | No | Create `.png`/`.pdf` visual art |
 | context7-cli | **Yes** | Fetch current library docs from Context7 |
 | doc-coauthoring | No | Guided documentation co-authoring workflow |
 | docs-maintainer | No | Create/update ADRs, CHANGELOG, README |
 | docx | No | Read/write `.docx` Word documents |
-| find-docs | No | Fetch library docs via Context7 |
 | find-skills | No | Discover and install new skills |
 | frontend-design | No | Production-grade frontend UI generation |
 | gh-cli | No | GitHub CLI (`gh`) reference |

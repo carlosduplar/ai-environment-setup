@@ -8,11 +8,9 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 |-------|-------------|-------------|----------|
 | **bright-data-mcp** | Web data operations (scraping, search, browser automation) | No | Data |
 | **context7-cli** | Fetch current library docs from Context7 | **Yes** | Dev Tools |
-| canvas-design | Create `.png`/`.pdf` visual art | No | Design |
 | doc-coauthoring | Guided documentation co-authoring workflow | No | Documentation |
 | docs-maintainer | Create/update ADRs, CHANGELOG, README | No | Documentation |
 | docx | Read/write `.docx` Word documents | No | Files |
-| find-docs | Fetch library docs via Context7 | No | Dev Tools |
 | find-skills | Discover and install new skills | No | Skills |
 | frontend-design | Production-grade frontend UI generation | No | Design |
 | gh-cli | GitHub CLI (`gh`) reference | No | Dev Tools |

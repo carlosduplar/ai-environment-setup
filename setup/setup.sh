@@ -341,7 +341,7 @@ declare -A SKILL_REPOS=(
 
 # GWS skills (only with --gws)
 declare -A GWS_SKILL_REPOS=(
-    ["googleworkspace/cli"]="gws-calendar gws-docs gws-drive gws-gmail gws-keep gws-shared gws-sheets gws-tasks gws-workflow-email-to-task gws-workflow-meeting-prep gws-workflow-standup-report gws-workflow-weekly-digest"
+    ["googleworkspace/cli"]="gws-calendar gws-docs gws-drive gws-gmail gws-keep gws-shared gws-sheets"
 )
 
 collect_installed_skills

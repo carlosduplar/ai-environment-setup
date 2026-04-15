@@ -21,11 +21,6 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 | gws-keep | Google Keep notes | No | Google Workspace |
 | gws-shared | Shared gws CLI patterns | No | Google Workspace |
 | gws-sheets | Google Sheets read/write | No | Google Workspace |
-| gws-tasks | Google Tasks management | No | Google Workspace |
-| gws-workflow-email-to-task | Gmail → Google Tasks workflow | No | Google Workspace |
-| gws-workflow-meeting-prep | Meeting prep from calendar + docs | No | Google Workspace |
-| gws-workflow-standup-report | Standup summary from calendar + tasks | No | Google Workspace |
-| gws-workflow-weekly-digest | Weekly calendar + email digest | No | Google Workspace |
 | pdf | PDF read/create/merge/split | No | Files |
 | playwright-cli | Browser automation via Playwright | No | Testing |
 | pptx | PowerPoint file operations | No | Files |

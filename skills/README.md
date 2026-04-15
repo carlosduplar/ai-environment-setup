@@ -36,11 +36,6 @@ Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googlework
 | gws-keep **-GWS** | No | Google Keep notes |
 | gws-shared **-GWS** | No | Shared gws CLI patterns |
 | gws-sheets **-GWS** | No | Google Sheets read/write |
-| gws-tasks **-GWS** | No | Google Tasks management |
-| gws-workflow-email-to-task **-GWS** | No | Gmail → Google Tasks workflow |
-| gws-workflow-meeting-prep **-GWS** | No | Meeting prep from calendar + docs |
-| gws-workflow-standup-report **-GWS** | No | Standup summary from calendar + tasks |
-| gws-workflow-weekly-digest **-GWS** | No | Weekly calendar + email digest |
 | mcp-builder | No | Build MCP servers (FastMCP/MCP SDK) |
 | pdf | No | PDF read/create/merge/split |
 | playwright-cli | No | Browser automation via Playwright |

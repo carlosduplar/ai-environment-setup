@@ -329,12 +329,7 @@ $gwsSkillGroup = [ordered]@{
         "gws-gmail",
         "gws-keep",
         "gws-shared",
-        "gws-sheets",
-        "gws-tasks",
-        "gws-workflow-email-to-task",
-        "gws-workflow-meeting-prep",
-        "gws-workflow-standup-report",
-        "gws-workflow-weekly-digest"
+        "gws-sheets"
     )
 }
 

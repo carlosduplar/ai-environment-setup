@@ -27,7 +27,6 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 | security-threat-modeler | Security review for auth, injection, secrets | No | Security |
 | seo-audit | Technical SEO audit | No | Web |
 | skill-creator | Create/modify/test skills | No | Skills |
-| tech-lead-reviewer | Comprehensive code review | No | Code Review |
 | test-writer | Write and run tests | No | Testing |
 | vercel-react-best-practices | React/Next.js performance patterns | No | React |
 | vercel-react-native-skills | React Native/Expo best practices | No | React Native |

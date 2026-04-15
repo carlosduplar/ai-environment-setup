@@ -43,7 +43,6 @@ Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googlework
 | security-threat-modeler | No | Security review for auth, injection, secrets |
 | seo-audit | No | Technical SEO audit |
 | skill-creator | No | Create/modify/test skills |
-| tech-lead-reviewer | No | Comprehensive code review |
 | test-writer | No | Write and run tests |
 | vercel-react-best-practices | No | React/Next.js performance patterns |
 | vercel-react-native-skills | No | React Native/Expo best practices |

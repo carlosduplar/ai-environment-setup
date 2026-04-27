@@ -11,44 +11,75 @@ Add to `~/.claude/settings.json`:
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "(Edit|Write|Bash)",
+        "matcher": "Read",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/pre-tool-use.ps1"
+            "command": "~/.claude/hooks/pretooluse.ps1",
+            "shell": "powershell",
+            "timeout": 30
           }
         ]
-      }
-    ],
-    "PostToolUse": [
+      },
       {
-        "matcher": "(Edit|Write)",
+        "matcher": "Write|Edit|MultiEdit|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/post-tool-use.ps1"
+            "command": "~/.claude/hooks/file-guard.ps1",
+            "shell": "powershell",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/bash-guard.ps1",
+            "shell": "powershell",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/write-guard.ps1",
+            "shell": "powershell",
+            "timeout": 5
           }
         ]
       }
     ],
     "Notification": [
       {
-        "matcher": ".*",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/notification.ps1"
+            "command": "~/.claude/hooks/notify.ps1",
+            "shell": "powershell",
+            "timeout": 15
           }
         ]
       }
     ],
-    "PostCompact": [
+    "PostToolUseFailure": [
       {
-        "matcher": ".*",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/post-compact.ps1"
+            "command": "~/.claude/hooks/posttoolusefailure.ps1",
+            "shell": "powershell",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start-reminder.ps1",
+            "shell": "powershell",
+            "timeout": 5
           }
         ]
       }
@@ -56,6 +87,19 @@ Add to `~/.claude/settings.json`:
   }
 }
 ```
+
+### Hook Scripts Reference
+
+| Script | Purpose |
+|--------|---------|
+| `pretooluse.ps1` | Pre-read guard - optimizes images/PDFs to temp files before reading |
+| `file-guard.ps1` | Blocks edits to protected paths (.env, .git, secrets), prevents outside-workspace access |
+| `bash-guard.ps1` | Blocks dangerous bash commands (sudo, rm -rf /, eval, curl \| bash) |
+| `write-guard.ps1` | Blocks writes containing secrets, allows safe files (.env.example, tests, .md) |
+| `notify.ps1` | Desktop notifications via Windows Toast |
+| `posttoolusefailure.ps1` | Logs tool failures to `~/.claude/logs/errors/` with rotation |
+| `session-start-reminder.ps1` | Shows project type, branch, uncommitted changes on session start |
+| `post-edit-format.ps1` | Auto-formats edited files (Prettier for JS/TS, Black for Python) |
 
 ## Copilot CLI Configuration
 

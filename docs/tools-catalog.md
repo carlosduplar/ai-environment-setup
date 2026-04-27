@@ -22,7 +22,7 @@ These agents are **detected** by setup — if present, their config and hooks ar
 - **CLI**: `claude`
 - **Install**: W — `winget install Anthropic.ClaudeCode` or native installer script (see https://code.claude.com/docs/en/setup)
 - **Config**: `~/.claude/settings.json`, `~/.claude/CLAUDE.md` → symlink to repo `config/.agents/core.md`
-- **Output Styles**: Optional `~/.claude/output-styles/` (see `config/output-styles/caveman.md`)
+- **Output Styles**: Optional `~/.claude/output-styles/` (see `config/output-styles/caveman.md`). Set `"outputStyle": "caveman"` in settings.json for ultra-compact responses.
 - **Auth**: `ANTHROPIC_AUTH_TOKEN` env var
 - **Docs**: https://docs.anthropic.com/claude-code
 

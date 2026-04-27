@@ -21,7 +21,7 @@ Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googlework
 
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|
-| brand-guidelines | No | Anthropic brand colors and typography |
+| chrome-devtools | No | Chrome DevTools debugging |
 | context7-cli | **Yes** | Fetch current library docs from Context7 |
 | doc-coauthoring | No | Guided documentation co-authoring workflow |
 | docs-maintainer | No | Create/update ADRs, CHANGELOG, README |
@@ -36,17 +36,18 @@ Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googlework
 | gws-keep **-GWS** | No | Google Keep notes |
 | gws-shared **-GWS** | No | Shared gws CLI patterns |
 | gws-sheets **-GWS** | No | Google Sheets read/write |
-| mcp-builder | No | Build MCP servers (FastMCP/MCP SDK) |
+| obsidian-cli | No | Obsidian vault management |
 | pdf | No | PDF read/create/merge/split |
 | playwright-cli | No | Browser automation via Playwright |
 | pptx | No | PowerPoint file operations |
 | security-threat-modeler | No | Security review for auth, injection, secrets |
 | seo-audit | No | Technical SEO audit |
+| shadcn-ui | No | shadcn/ui component guidance |
 | skill-creator | No | Create/modify/test skills |
+| stitch-design | No | Stitch design workflow |
 | test-writer | No | Write and run tests |
 | vercel-react-best-practices | No | React/Next.js performance patterns |
 | vercel-react-native-skills | No | React Native/Expo best practices |
-| web-artifacts-builder | No | Multi-component HTML artifacts |
 | web-design-guidelines | No | UI/UX guidelines review |
 | webapp-testing | No | Local web app testing with Playwright |
 | xlsx | No | Spreadsheet file operations |

@@ -21,28 +21,35 @@ These agents are **detected** by setup — if present, their config and hooks ar
 ### Claude Code
 - **CLI**: `claude`
 - **Install**: W — `winget install Anthropic.ClaudeCode` or native installer script (see https://code.claude.com/docs/en/setup)
-- **Config**: `~/.claude/settings.json`, `~/.claude/CLAUDE.md`
+- **Config**: `~/.claude/settings.json`, `~/.claude/CLAUDE.md` → symlink to repo `config/.agents/core.md`
+- **Output Styles**: Optional `~/.claude/output-styles/` (see `config/output-styles/caveman.md`)
 - **Auth**: `ANTHROPIC_AUTH_TOKEN` env var
 - **Docs**: https://docs.anthropic.com/claude-code
 
 ### OpenCode
 - **CLI**: `opencode`
 - **Install**: N — `npm install -g opencode`
-- **Config**: `~/.config/opencode/opencode.json`
+- **Config**: `~/.config/opencode/opencode.json` — see `config/opencode/opencode.json.example`
 - **Auth**: Delegated to provider API keys (see `.env.local`)
 - **Docs**: https://opencode.ai
 
 ### Gemini CLI
 - **CLI**: `gemini`
 - **Install**: N — `npm install -g @google/gemini-cli`
-- **Config**: `~/.gemini/GEMINI.md` (system prompt), `~/.gemini/mcp-server-enablement.json`
+- **Config**: `~/.gemini/GEMINI.md` → symlink to repo `config/.agents/core.md`
 - **Auth**: Google OAuth (browser-based) or `GOOGLE_API_KEY`
 - **Docs**: https://github.com/google-gemini/gemini-cli
+
+### Codex
+- **CLI**: `codex`
+- **Install**: Native installer or `npm install -g @anthropic/codex`
+- **Config**: `~/.codex/config.toml`, `~/.codex/AGENTS.md` → symlink to repo `config/.agents/core.md`
+- **Example**: `config/codex/config.toml.example` (merge with existing config)
 
 ### GitHub Copilot CLI
 - **CLI**: `copilot`
 - **Install**: N — `npm install -g @github/copilot`
-- **Config**: `~/.copilot/`
+- **Config**: `~/.copilot/copilot-instructions.md` → symlink to repo `config/.agents/core.md`
 - **Auth**: `gh auth login` → `GITHUB_TOKEN`
 - **Docs**: https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-copilot-cli
 

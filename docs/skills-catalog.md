@@ -6,7 +6,8 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 
 | Skill | Description | Always Apply | Category |
 |-------|-------------|-------------|----------|
-| **bright-data-mcp** | Web data operations (scraping, search, browser automation) | No | Data |
+| **brightdata-cli** | Web data operations (scraping, search, browser automation) | No | Data |
+| **chrome-devtools** | Chrome DevTools debugging | No | Dev Tools |
 | **context7-cli** | Fetch current library docs from Context7 | **Yes** | Dev Tools |
 | doc-coauthoring | Guided documentation co-authoring workflow | No | Documentation |
 | docs-maintainer | Create/update ADRs, CHANGELOG, README | No | Documentation |
@@ -21,12 +22,15 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 | gws-keep | Google Keep notes | No | Google Workspace |
 | gws-shared | Shared gws CLI patterns | No | Google Workspace |
 | gws-sheets | Google Sheets read/write | No | Google Workspace |
+| obsidian-cli | Obsidian vault management | No | Dev Tools |
 | pdf | PDF read/create/merge/split | No | Files |
 | playwright-cli | Browser automation via Playwright | No | Testing |
 | pptx | PowerPoint file operations | No | Files |
 | security-threat-modeler | Security review for auth, injection, secrets | No | Security |
 | seo-audit | Technical SEO audit | No | Web |
+| shadcn-ui | shadcn/ui component guidance | No | UI |
 | skill-creator | Create/modify/test skills | No | Skills |
+| stitch-design | Stitch design workflow | No | Design |
 | test-writer | Write and run tests | No | Testing |
 | vercel-react-best-practices | React/Next.js performance patterns | No | React |
 | vercel-react-native-skills | React Native/Expo best practices | No | React Native |

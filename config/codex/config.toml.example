@@ -1,0 +1,15 @@
+model = "gpt-5.3-codex"
+model_reasoning_effort = "medium"
+personality = "pragmatic"
+plan_mode_reasoning_effort = "medium"
+model_verbosity = "low"
+developer_instructions = """
+Smart caveman style: terse responses, keep technical substance.
+Lead with answer. Be concise. No fluff or recap.
+Preserve exact commands/paths/errors/code.
+Use bullets only when they improve scan speed.
+Use normal explicit language for safety-critical/irreversible actions.
+"""
+
+[analytics]
+enabled = false

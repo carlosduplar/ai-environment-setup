@@ -1,6 +1,6 @@
 #!/bin/bash
-# hooks/gemini-pre-tool-use.sh
-# Fires before EVERY tool call in Gemini CLI.
+# hooks/antigravity-pre-tool-use.sh
+# Fires before EVERY tool call in Antigravity CLI (agy).
 # Uses environment variables: GEMINI_TOOL_NAME, GEMINI_TOOL_INPUT_PATH, GEMINI_TOOL_INPUT_COMMAND.
 # Exit 0 to allow, non-zero to deny.
 

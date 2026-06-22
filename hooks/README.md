@@ -8,7 +8,7 @@ Hooks allow custom scripts to run at specific points in the AI tool lifecycle �
 |------|---------------|-----------------|
 | Claude Code | Shell scripts | `~/.claude/settings.json` → `hooks` |
 | OpenCode | JS/TS plugins | `~/.config/opencode/plugins/*.js` |
-| Gemini CLI | Shell scripts | `~/.gemini/settings.json` → `hooks` |
+| Antigravity CLI | Shell scripts | `~/.gemini/settings.json` → `hooks` |
 | GitHub Copilot CLI | Repo-scoped hook JSON | `.github/hooks/hooks.json` |
 
 ## Claude Code
@@ -75,8 +75,7 @@ This repository also ships a dedicated hook package at `hooks/binary-to-markdown
 
 - `convert.py` runs `markitdown` and optionally falls back to Mistral OCR for poor PDF extraction.
 - `claude-code.sh/.ps1` returns Claude block responses with injected converted Markdown.
-- `gemini.sh/.ps1` converts and logs guidance (Gemini cannot inject replacement content).
-- `codex.sh/.ps1` is an explicit stub until Codex hook specs are published.
+- `antigravity.sh/.ps1` converts and logs guidance (Antigravity cannot inject replacement content).
 - OpenCode uses `config/opencode/plugins/binary-to-markdown.js` instead of shell wrappers.
 
 ### OpenCode compatibility for README hook options
@@ -94,7 +93,7 @@ This repository also ships a dedicated hook package at `hooks/binary-to-markdown
 | `AfterModel` | No equivalent plugin event in docs | Not supported |
 | `AfterAgent` | No equivalent plugin event in docs | Not supported |
 
-## Gemini CLI
+## Antigravity CLI
 
 Shell scripts referenced from `~/.gemini/settings.json`:
 
@@ -120,7 +119,7 @@ Shell scripts referenced from `~/.gemini/settings.json`:
 | `AfterAgent` | After agent completes |
 | `SessionEnd` | Session ends |
 
-Scripts: `gemini-pre-tool-use.sh/ps1` → copied to `~/.gemini/hooks/pre-tool-use.sh/ps1`
+Scripts: `antigravity-pre-tool-use.sh/ps1` → copied to `~/.gemini/hooks/pre-tool-use.sh/ps1`
 
 ## GitHub Copilot CLI
 

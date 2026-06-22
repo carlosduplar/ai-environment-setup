@@ -30,10 +30,10 @@ step "2/5 — AI agents"
 
 has_claude=false
 has_opencode=false
-has_gemini=false
+has_agy=false
 has_copilot=false
 
-for pair in "claude:has_claude" "opencode:has_opencode" "gemini:has_gemini" "copilot:has_copilot"; do
+for pair in "claude:has_claude" "opencode:has_opencode" "agy:has_agy" "copilot:has_copilot"; do
     cmd="${pair%%:*}"
     var="${pair##*:}"
     if command -v "$cmd" &>/dev/null; then
@@ -104,13 +104,12 @@ else
     info "OpenCode not installed — skipping its config checks"
 fi
 
-if [[ "$has_gemini" == "true" ]]; then
-    check_file "$HOME/.gemini/GEMINI.md"                   "Gemini system prompt"
-    check_file "$HOME/.gemini/mcp-server-enablement.json"  "Gemini MCP enablement"
-    check_file "$HOME/.gemini/hooks/pre-tool-use.sh"       "Gemini hook (sh)"
-    check_file "$HOME/.gemini/hooks/pre-tool-use.ps1"      "Gemini hook (ps1)"
+if [[ "$has_agy" == "true" ]]; then
+    check_file "$HOME/.gemini/AGY.md"                      "Antigravity system prompt"
+    check_file "$HOME/.gemini/hooks/pre-tool-use.sh"       "Antigravity hook (sh)"
+    check_file "$HOME/.gemini/hooks/pre-tool-use.ps1"      "Antigravity hook (ps1)"
 else
-    info "Gemini not installed — skipping its config/hook checks"
+    info "Antigravity CLI not installed — skipping its config/hook checks"
 fi
 
 if [[ "$has_copilot" == "true" ]]; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup.sh — Install the full AI coding environment (Git Bash on Windows 11)
+# setup.sh — Install the full AI coding environment
 # Usage: bash setup/setup.sh [--update] [--dry-run] [--gws] [--firebase]
 
 set -euo pipefail
@@ -21,6 +21,12 @@ if [[ -n "${TERMUX_VERSION:-}" ]] || [[ -n "${PREFIX:-}" && "$PREFIX" == */termu
     IS_TERMUX=true
 fi
 
+# Detect WSL2 environment
+IS_WSL=false
+if grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null || [[ "$(uname -r)" == * microsoft * ]]; then
+    IS_WSL=true
+fi
+
 for arg in "$@"; do
     case $arg in
         --update)    UPDATE=true ;;
@@ -39,6 +45,8 @@ source "$SCRIPT_DIR/lib/utils.sh"
 step "Pre-flight checks"
 if [[ "$IS_TERMUX" == "true" ]]; then
     info "Termux detected — markitdown features will be skipped"
+elif [[ "$IS_WSL" == "true" ]]; then
+    info "WSL2 detected — using Linux paths and apt package manager"
 fi
 assert_command "node" "Install Node.js: https://nodejs.org"
 assert_command "npm"  "Install Node.js: https://nodejs.org"
@@ -331,10 +339,8 @@ else:
 
 # Core skills grouped by repository (always installed)
 declare -A SKILL_REPOS=(
-    ["anthropics/skills"]="docx pdf pptx xlsx webapp-testing frontend-design skill-creator"
-    ["vercel-labs/agent-skills"]="vercel-react-best-practices vercel-react-native-skills web-design-guidelines"
+    ["anthropics/skills"]="docx pdf pptx xlsx webapp-testing skill-creator"
     ["vercel-labs/skills"]="find-skills"
-    ["coreyhaines31/marketingskills"]="seo-audit"
     ["microsoft/playwright-cli"]="playwright-cli"
     ["upstash/context7"]="context7-cli"
 )
@@ -400,7 +406,7 @@ step "5/7 — Detect agents"
 
 declare -A AGENTS
 
-for pair in "claude:claude" "opencode:opencode" "gemini:gemini" "copilot:gh-copilot"; do
+for pair in "claude:claude" "opencode:opencode" "agy:agy" "copilot:gh-copilot"; do
     name="${pair%%:*}"
     cmd="${pair##*:}"
     if command -v "$cmd" &>/dev/null; then
@@ -449,12 +455,11 @@ if [[ "${AGENTS[opencode]}" == "true" ]]; then
     CONFIGS["$CONFIG/opencode/plugins/shell-detector.js"]="$HOME_DIR/.config/opencode/plugins/shell-detector.js"
 fi
 
-# Gemini config + hooks
-if [[ "${AGENTS[gemini]}" == "true" ]]; then
-    CONFIGS["$CONFIG/gemini/GEMINI.md"]="$HOME_DIR/.gemini/GEMINI.md"
-    CONFIGS["$CONFIG/gemini/mcp-server-enablement.json"]="$HOME_DIR/.gemini/mcp-server-enablement.json"
-    CONFIGS["$HOOKS/gemini-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
-    CONFIGS["$HOOKS/gemini-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
+# Antigravity CLI config + hooks (agy — successor to Gemini CLI)
+if [[ "${AGENTS[agy]}" == "true" ]]; then
+    CONFIGS["$CONFIG/antigravity/AGY.md"]="$HOME_DIR/.gemini/AGY.md"
+    CONFIGS["$HOOKS/antigravity-pre-tool-use.sh"]="$HOME_DIR/.gemini/hooks/pre-tool-use.sh"
+    CONFIGS["$HOOKS/antigravity-pre-tool-use.ps1"]="$HOME_DIR/.gemini/hooks/pre-tool-use.ps1"
 fi
 
 # Copilot config

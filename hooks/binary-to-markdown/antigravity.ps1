@@ -31,8 +31,8 @@ if ($supportedExtensions -notcontains $extension) {
 & $pythonCmd $converter $filePath | Out-Null
 if ($LASTEXITCODE -eq 0) {
     $fileName = [System.IO.Path]::GetFileName($filePath)
-    Write-Error '[binary-to-markdown] Note: Gemini hook cannot inject converted content back.'
-    Write-Error ("[binary-to-markdown] Converted `{0}` to Markdown but Gemini will still attempt the raw read." -f $fileName)
+    Write-Error '[binary-to-markdown] Note: Antigravity hook cannot inject converted content back.'
+    Write-Error ("[binary-to-markdown] Converted `{0}` to Markdown but Antigravity will still attempt the raw read." -f $fileName)
     Write-Error "[binary-to-markdown] Consider pre-converting manually with: markitdown `"$filePath`""
 }
 

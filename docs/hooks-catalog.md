@@ -308,7 +308,7 @@ Pre-tool use hook on bash that checks commands against a whitelist. If matched, 
 | `GITHUB_COPILOT_TOOL_INPUT_PATH` | Path argument for file tools |
 | `GITHUB_COPILOT_TOOL_INPUT_COMMAND` | Command string for Bash |
 
-## Hook environment variables (Gemini CLI)
+## Hook environment variables (Antigravity CLI)
 
 | Variable | Value |
 |----------|-------|
@@ -322,9 +322,9 @@ The repository includes ready-to-use hook assets:
 
 - `claude-code-pre-tool-use.sh` / `.ps1` – Claude Code pre-tool guard
 - `post-tool-use.sh` / `.ps1`, `notification.sh` / `.ps1`, `post-compact.sh` / `.ps1` – Claude Code lifecycle hooks
-- `gemini-pre-tool-use.sh` / `.ps1` – Gemini CLI pre-tool guard
-- `hooks/binary-to-markdown/convert.py`, `claude-code.sh` / `.ps1`, `gemini.sh` / `.ps1`, `codex.sh` / `.ps1` – binary document conversion package
+- `antigravity-pre-tool-use.sh` / `.ps1` – Antigravity CLI pre-tool guard
+- `hooks/binary-to-markdown/convert.py`, `claude-code.sh` / `.ps1`, `antigravity.sh` / `.ps1` – binary document conversion package
 - `pre-tool-use.sh` / `.ps1`, `post-tool-use.sh` / `.ps1`, `session-start.sh` / `.ps1`, `session-end.sh` / `.ps1` – Copilot CLI repo hooks
 - `config/opencode/plugins/security.js`, `format-on-write.js`, `notifications.js`, `context-refresh.js`, `session-lifecycle.js`, `binary-to-markdown.js` – OpenCode plugin hooks
 
-Bootstrap copies these to user hook/plugin directories (Claude, Gemini, OpenCode). Copilot hooks stay repo-scoped in `.github/hooks/hooks.json`.
+Bootstrap copies these to user hook/plugin directories (Claude, Antigravity, OpenCode). Copilot hooks stay repo-scoped in `.github/hooks/hooks.json`.

@@ -38,7 +38,7 @@ google_accounts.json
 .opencode/bun.lock
 .opencode/plans/
 
-# Gemini
+# Antigravity CLI (agy — uses ~/.gemini/ directory)
 .gemini/history/
 .gemini/tmp/
 .gemini/antigravity/

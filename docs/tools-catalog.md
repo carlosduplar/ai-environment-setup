@@ -7,8 +7,10 @@ Complete reference for every CLI in this environment.
 | Symbol | Meaning |
 |--------|---------|
 | W | winget |
+| A | apt (Debian/Ubuntu) |
 | N | npm global |
 | P | pip |
+| PX | pipx |
 | GH | gh extension |
 | D | Direct binary |
 
@@ -28,21 +30,21 @@ These agents are **detected** by setup — if present, their config and hooks ar
 
 ### OpenCode
 - **CLI**: `opencode`
-- **Install**: N — `npm install -g opencode`
+- **Install**: D — `~/.opencode/bin/opencode`
 - **Config**: `~/.config/opencode/opencode.json` — see `config/opencode/opencode.json.example`
 - **Auth**: Delegated to provider API keys (see `.env.local`)
 - **Docs**: https://opencode.ai
 
-### Gemini CLI
-- **CLI**: `gemini`
-- **Install**: N — `npm install -g @google/gemini-cli`
-- **Config**: `~/.gemini/GEMINI.md` → symlink to repo `config/.agents/core.md`
-- **Auth**: Google OAuth (browser-based) or `GOOGLE_API_KEY`
-- **Docs**: https://github.com/google-gemini/gemini-cli
+### Antigravity CLI (agy)
+- **CLI**: `agy`
+- **Install**: D — `~/.local/bin/agy`
+- **Config**: `~/.gemini/AGY.md` → symlink to repo `config/antigravity/AGY.md`
+- **Auth**: OAuth (browser-based) or `GEMINI_API_KEY`
+- **Notes**: Successor to Gemini CLI. Uses `~/.gemini/` as its config directory.
 
 ### Codex
 - **CLI**: `codex`
-- **Install**: Native installer or `npm install -g @anthropic/codex`
+- **Install**: N — `npm install -g @openai/codex`
 - **Config**: `~/.codex/config.toml`, `~/.codex/AGENTS.md` → symlink to repo `config/.agents/core.md`
 - **Example**: `config/codex/config.toml.example` (merge with existing config)
 
@@ -59,13 +61,13 @@ These agents are **detected** by setup — if present, their config and hooks ar
 
 ### Git
 - **CLI**: `git`
-- **Install**: W — `winget install Git.Git`
+- **Install**: W — `winget install Git.Git` / A — `sudo apt install git`
 - **Config**: `~/.gitconfig`, `~/.gitignore_global`
 - **Docs**: https://git-scm.com
 
 ### GitHub CLI
 - **CLI**: `gh`
-- **Install**: W — `winget install GitHub.cli`
+- **Install**: W — `winget install GitHub.cli` / A — `sudo apt install gh`
 - **Config**: `~/.config/gh/`
 - **Auth**: `gh auth login`
 - **Docs**: https://cli.github.com
@@ -76,13 +78,28 @@ These agents are **detected** by setup — if present, their config and hooks ar
 
 ### Node.js / npm
 - **CLI**: `node`, `npm`, `npx`
-- **Install**: W — `winget install OpenJS.NodeJS.LTS`
+- **Install**: W — `winget install OpenJS.NodeJS.LTS` / NVM on Linux
 - **Version**: LTS
 
 ### Python
-- **CLI**: `python`, `pip`
-- **Install**: W — `winget install Python.Python.3` (only if no python exists)
+- **CLI**: `python3`, `pip`
+- **Install**: W — `winget install Python.Python.3` / A — `sudo apt install python3 python3-pip`
 - **Notes**: Installed by setup only when python is not already present
+
+### uv (Fast Python)
+- **CLI**: `uv`, `uvx`
+- **Install**: D — `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **Notes**: Fast Python package installer and resolver
+
+### Bun
+- **CLI**: `bun`
+- **Install**: D — `curl -fsSL https://bun.sh/install | bash`
+- **Notes**: Fast JavaScript runtime and package manager
+
+### Cargo (Rust)
+- **CLI**: `cargo`, `rustc`
+- **Install**: D — `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+- **Notes**: Rust package manager
 
 ---
 
@@ -101,7 +118,7 @@ These agents are **detected** by setup — if present, their config and hooks ar
 ### Context7 (ctx7)
 - **CLI**: `ctx7`
 - **Install**: N — `npm install -g ctx7`
-- **Auth**: None
+- **Auth**: None (optional `CONTEXT7_API_KEY` for higher rate limits)
 - **Docs**: https://context7.com
 
 ### MarkItDown
@@ -112,12 +129,80 @@ These agents are **detected** by setup — if present, their config and hooks ar
 
 ---
 
+## AI Proxy & Optimization
+
+### Headroom
+- **CLI**: `headroom`
+- **Install**: PX — `pipx install headroom-ai`
+- **Config**: `~/.headroom/`
+- **Auth**: API key
+- **Notes**: Routes all AI API calls through a local proxy for cost optimization and token tracking. Central component for multi-agent setups.
+- **Env vars**: `HEADROOM_PORT`, `HEADROOM_HOST`, `HEADROOM_MODE`, `HEADROOM_BACKEND`
+
+### RTK (Rust Token Killer)
+- **CLI**: `rtk`
+- **Install**: D — `~/.local/bin/rtk`
+- **Notes**: Wraps commands for 60-90% output reduction. Token savings wrapper.
+
+### LiteLLM
+- **CLI**: `litellm`, `litellm-proxy`
+- **Install**: PX — via uv tool
+- **Notes**: Universal LLM API proxy. Supports 100+ LLM providers.
+
+---
+
+## AI Assistants & Tools
+
+### Aider
+- **CLI**: `aider`
+- **Install**: PX — `pipx install aider-chat`
+- **Notes**: AI pair programming in your terminal. Git-aware editing.
+
+### Kimi Code
+- **CLI**: `kimi-code`
+- **Install**: D — `~/.kimi-code/bin/kimi-code`
+- **Config**: `~/.kimi-code/config.toml`
+- **Notes**: Moonshot AI coding assistant.
+
+### MiMo Code
+- **CLI**: `mimo`
+- **Install**: D — `~/.mimocode/bin/mimo`
+- **Notes**: Xiaomi MiMo coding agent.
+
+### Cursor Agent
+- **CLI**: `cursor-agent`
+- **Install**: D — `~/.local/bin/cursor-agent`
+- **Notes**: Cursor IDE's command-line agent.
+
+### CodeRabbit
+- **CLI**: `coderabbit`, `cr`
+- **Install**: D — `~/.local/bin/coderabbit`
+- **Notes**: AI code review tool.
+
+### Modal
+- **CLI**: `modal`
+- **Install**: PX — `pipx install modal`
+- **Notes**: Cloud compute platform for AI/ML workloads.
+
+### HuggingFace CLI
+- **CLI**: `hf`, `huggingface-cli`, `tiny-agents`
+- **Install**: PX — `pipx install huggingface-hub`
+- **Auth**: `HF_TOKEN`
+- **Notes**: HuggingFace Hub access, model downloads, tiny agents.
+
+---
+
 ## Utilities
 
 ### jq
 - **CLI**: `jq`
-- **Install**: W — `winget install jqlang.jq`
+- **Install**: W — `winget install jqlang.jq` / A — `sudo apt install jq`
 - **Docs**: https://jqlang.github.io/jq
+
+### dotenv
+- **CLI**: `dotenv`
+- **Install**: D — `~/.local/bin/dotenv`
+- **Notes**: Load environment variables from `.env` files.
 
 ### winget
 - **CLI**: `winget`
@@ -152,9 +237,19 @@ These are NOT installed by default. Use setup flags to opt in.
 | Variable | Tool | Required |
 |----------|------|----------|
 | `ANTHROPIC_AUTH_TOKEN` | Claude Code | Yes |
-| `ANTHROPIC_BASE_URL` | Claude Code | No (proxy only) |
-| `BRIGHTDATA_API_KEY` | Bright Data CLI | Yes |
-| `NVIDIA_API_KEY` | OpenCode (nvidia provider) | No |
-| `OPENROUTER_API_KEY` | OpenCode (openrouter provider) | No |
-| `MISTRAL_API_KEY` | OpenCode (mistral provider) | No |
+| `ANTHROPIC_BASE_URL` | Claude Code (proxy) | No |
 | `GITHUB_TOKEN` | gh, Copilot CLI | Yes |
+| `BRIGHTDATA_API_KEY` | Bright Data CLI | Optional |
+| `NVIDIA_API_KEY` | OpenCode (nvidia provider) | Optional |
+| `OPENROUTER_API_KEY` | OpenCode (openrouter provider) | Optional |
+| `MISTRAL_API_KEY` | OpenCode (mistral) + Mistral OCR | Optional |
+| `GROQ_API_KEY` | Groq API | Optional |
+| `HF_TOKEN` | HuggingFace CLI | Optional |
+| `BRAVE_SEARCH_API_KEY` | Brave Search | Optional |
+| `CONTEXT7_API_KEY` | Context7 (higher rate limits) | Optional |
+| `GEMINI_API_KEY` | Antigravity CLI (agy) | Optional |
+| `GOOGLE_CLOUD_PROJECT` | gcloud/Firebase | Optional |
+| `HEADROOM_PORT` | Headroom proxy | Optional |
+| `HEADROOM_HOST` | Headroom proxy | Optional |
+| `HEADROOM_MODE` | Headroom proxy | Optional |
+| `HEADROOM_BACKEND` | Headroom proxy | Optional |

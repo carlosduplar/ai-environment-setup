@@ -5,7 +5,7 @@ A **public template repository** capturing a reproducible AI coding environment 
 ## What This Repo Does
 
 - Documents every CLI tool and its install source
-- Provides safe, secret-free config scaffolding for OpenCode, Claude Code, Gemini CLI, GitHub Copilot CLI
+- Provides safe, secret-free config scaffolding for OpenCode, Claude Code, Antigravity CLI, GitHub Copilot CLI
 - Ships setup scripts to install everything from scratch
 - Ships verify scripts to assert a machine is in the expected state
 - Catalogs shared skills and hooks
@@ -16,9 +16,9 @@ A **public template repository** capturing a reproducible AI coding environment 
 |----------|--------|
 | Windows 11 + PowerShell 7 | Primary target |
 | Windows 11 + Git Bash | Supported |
+| WSL2 Ubuntu | Supported |
 | Termux (Android) | Supported — markitdown features auto-skipped |
 | macOS | Planned |
-| Linux | Planned |
 
 ## Why No MCP Servers? (MCP vs CLI)
 
@@ -59,7 +59,7 @@ ai-environment-setup/
 ├── config/ # AI tool config scaffolding (no secrets)
 │   ├── claude-code/
 │   ├── opencode/
-│   ├── gemini/
+│   ├── antigravity/
 │   └── github-copilot/
 ├── skills/ # Agent skills catalog
 ├── hooks/              # Shared hooks for AI tools
@@ -144,7 +144,7 @@ See [docs/tools-catalog.md](docs/tools-catalog.md) for the full list of tools, t
 |------|-------------|---------------|-----------------|
 | Claude Code | Anthropic's AI coding assistant | Detected; configure if present | `~/.claude/settings.json` |
 | OpenCode | OpenCode's AI coding assistant | Detected; configure if present | `~/.config/opencode/opencode.json` |
-| Gemini CLI | Google's AI CLI | Detected; configure if present | `~/.gemini/GEMINI.md` |
+| Antigravity CLI | Anthropic's AI CLI (agy) | Detected; configure if present | `~/.gemini/AGY.md` |
 | GitHub Copilot CLI | GitHub's AI coding assistant | Detected; configure if present | `~/.copilot/` |
 | Playwright CLI | Browser automation | `npm install -g @playwright/cli` | Per-project |
 | Context7 (ctx7) | Fetch current library docs | `npm -g ctx7` | Per-project |
@@ -165,7 +165,7 @@ templates/.env.example
         ▼                                                              │
 config/claude-code/settings.json.example  ──(apply)──>  ~/.claude/settings.json
 config/opencode/opencode.json.example     ──(apply)──>  ~/.config/opencode/opencode.json
-config/gemini/GEMINI.md                   ──(apply)──>  ~/.gemini/GEMINI.md
+config/antigravity/AGY.md                    ──(apply)──>  ~/.gemini/AGY.md
 config/github-copilot/copilot-instructions.md  ──(apply)──>  ~/.copilot/copilot-instructions.md
 ```
 
@@ -224,7 +224,7 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 |------|-------------|-----------|---------------------|-------------|
 | Claude Code | `claude-code-pre-tool-use.sh` / `.ps1` | Environment variables (`CLAUDE_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.claude/settings.json` | `.claude/settings.json` |
 | OpenCode | `config/opencode/plugins/*.js` | Plugin hooks (`tool.execute.before`, `tool.execute.after`, `permission.asked`, session lifecycle events) | `~/.config/opencode/opencode.json` + `~/.config/opencode/plugins/` | `config/opencode/plugins/` |
-| Gemini CLI | `gemini-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.gemini/` | `.gemini/` |
+| Antigravity CLI | `antigravity-pre-tool-use.sh` / `.ps1` | Environment variables (`GEMINI_TOOL_NAME`, etc.) — exit non-zero to deny | `~/.gemini/` | `.gemini/` |
 | GitHub Copilot CLI | `hooks/pre-tool-use.sh` / `.ps1` | JSON stdin (`toolName`, `toolArgs`) — output JSON with `permissionDecision` | Not supported | `.github/hooks/*.json` |
 
 ### Shared Hook Scripts (all platforms)
@@ -261,12 +261,12 @@ Markdown instructions are **advisory** — hooks are **enforcement**. Use hooks 
 - **Claude Code**: Uses `CLAUDE_TOOL_NAME`, `CLAUDE_TOOL_INPUT_PATH`, `CLAUDE_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
 - **OpenCode**: Uses plugins in `config/opencode/plugins/`. `security.js` handles pre-tool guardrails, `format-on-write.js` handles post-tool formatting, `notifications.js` handles permission/session notifications, and `context-refresh.js` + `session-lifecycle.js` handle compact/session lifecycle hooks.
 - **OpenCode (binary conversion)**: `config/opencode/plugins/binary-to-markdown.js` intercepts `read` calls for supported binary extensions and returns converted Markdown via deny reason payload.
-- **Gemini CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
+- **Antigravity CLI**: Uses `GEMINI_TOOL_NAME`, `GEMINI_TOOL_INPUT_PATH`, `GEMINI_TOOL_INPUT_COMMAND`. Exit code 1 = deny.
 - **GitHub Copilot CLI**: Hooks are **repo-scoped only** (`.github/hooks/`). There is **no global/user-level hook config** — hooks must be added to each repository individually. This is a known limitation tracked in [GitHub issue #1157](https://github.com/github/copilot-cli/issues/1157).
 
 ### Copilot CLI Hook Limitation
 
-Unlike Claude Code, OpenCode, and Gemini CLI — which all support global/user-level hook configuration — GitHub Copilot CLI currently **does not support user-based hook files**. This means:
+Unlike Claude Code, OpenCode, and Antigravity CLI — which all support global/user-level hook configuration — GitHub Copilot CLI currently **does not support user-based hook files**. This means:
 
 - Hooks only work when running Copilot CLI **from within a repository** that has `.github/hooks/*.json`
 - Each repo must independently include its own hook configuration

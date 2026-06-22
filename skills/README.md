@@ -17,40 +17,45 @@ Skills are activated by name in the Copilot CLI or Claude Code session. For alwa
 
 See [catalog/](catalog/) for all skill definitions.
 
-Skills marked with **-GWS** require the `-GWS` setup flag (includes `@googleworkspace/cli`).
+| Skill | Always Apply | Description |
+|-------|-------------|-------------|
+| context7-cli | **Yes** | Fetch current library docs from Context7 |
+| find-skills | No | Discover and install new skills |
+| skill-creator | No | Create/modify/test skills |
+
+### File Operations
 
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|
-| chrome-devtools | No | Chrome DevTools debugging |
-| context7-cli | **Yes** | Fetch current library docs from Context7 |
-| doc-coauthoring | No | Guided documentation co-authoring workflow |
-| docs-maintainer | No | Create/update ADRs, CHANGELOG, README |
 | docx | No | Read/write `.docx` Word documents |
-| find-skills | No | Discover and install new skills |
-| frontend-design | No | Production-grade frontend UI generation |
-| gh-cli | No | GitHub CLI (`gh`) reference |
-| gws-calendar **-GWS** | No | Google Calendar operations |
-| gws-docs **-GWS** | No | Read/write Google Docs |
-| gws-drive **-GWS** | No | Google Drive file management |
-| gws-gmail **-GWS** | No | Gmail send/read/manage |
-| gws-keep **-GWS** | No | Google Keep notes |
-| gws-shared **-GWS** | No | Shared gws CLI patterns |
-| gws-sheets **-GWS** | No | Google Sheets read/write |
-| obsidian-cli | No | Obsidian vault management |
 | pdf | No | PDF read/create/merge/split |
-| playwright-cli | No | Browser automation via Playwright |
 | pptx | No | PowerPoint file operations |
-| security-threat-modeler | No | Security review for auth, injection, secrets |
-| seo-audit | No | Technical SEO audit |
-| shadcn-ui | No | shadcn/ui component guidance |
-| skill-creator | No | Create/modify/test skills |
-| stitch-design | No | Stitch design workflow |
-| test-writer | No | Write and run tests |
-| vercel-react-best-practices | No | React/Next.js performance patterns |
-| vercel-react-native-skills | No | React Native/Expo best practices |
-| web-design-guidelines | No | UI/UX guidelines review |
-| webapp-testing | No | Local web app testing with Playwright |
 | xlsx | No | Spreadsheet file operations |
+
+### Testing & Automation
+
+| Skill | Always Apply | Description |
+|-------|-------------|-------------|
+| playwright-cli | No | Browser automation via Playwright |
+| webapp-testing | No | Local web app testing with Playwright |
+
+### Dev Tools
+
+| Skill | Always Apply | Description |
+|-------|-------------|-------------|
+| gh-cli | No | GitHub CLI (`gh`) reference |
+
+### Google Workspace (requires `-GWS` flag)
+
+| Skill | Always Apply | Description |
+|-------|-------------|-------------|
+| gws-calendar | No | Google Calendar operations |
+| gws-docs | No | Read/write Google Docs |
+| gws-drive | No | Google Drive file management |
+| gws-gmail | No | Gmail send/read/manage |
+| gws-keep | No | Google Keep notes |
+| gws-shared | No | Shared gws CLI patterns |
+| gws-sheets | No | Google Sheets read/write |
 
 ## Adding a skill
 

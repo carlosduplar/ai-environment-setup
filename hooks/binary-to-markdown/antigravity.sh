@@ -26,8 +26,8 @@ esac
 
 if python3 "$CONVERTER" "$FILE_PATH" >/dev/null; then
   FILE_NAME="$(basename "$FILE_PATH")"
-  echo "[binary-to-markdown] Note: Gemini hook cannot inject converted content back." >&2
-  echo "[binary-to-markdown] Converted \`$FILE_NAME\` to Markdown but Gemini will still attempt the raw read." >&2
+  echo "[binary-to-markdown] Note: Antigravity hook cannot inject converted content back." >&2
+  echo "[binary-to-markdown] Converted \`$FILE_NAME\` to Markdown but Antigravity will still attempt the raw read." >&2
   echo "[binary-to-markdown] Consider pre-converting manually with: markitdown \"$FILE_PATH\"" >&2
 fi
 

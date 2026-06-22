@@ -42,21 +42,21 @@ npm config get prefix
 
 ---
 
-## Gemini CLI
+## Antigravity CLI (agy)
 
 ### OAuth login loop
 Delete stored credentials and re-authenticate:
 
 ```powershell
 Remove-Item "$env:USERPROFILE\.gemini\oauth_creds.json" -ErrorAction SilentlyContinue
-gemini  # will prompt for login
+agy  # will prompt for login
 ```
 
-### GEMINI.md not applied
-The file must be at `~/.gemini/GEMINI.md`. Check:
+### AGY.md not applied
+The file must be at `~/.gemini/AGY.md`. Check:
 
 ```powershell
-Test-Path "$env:USERPROFILE\.gemini\GEMINI.md"
+Test-Path "$env:USERPROFILE\.gemini\AGY.md"
 ```
 
 ---

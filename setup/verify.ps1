@@ -82,7 +82,7 @@ Test-Tool "curl"
 Write-Step "2/6 — AI agents"
 $hasClaude   = Test-OptionalTool "claude"
 $hasOpenCode = Test-OptionalTool "opencode"
-$hasGemini   = Test-OptionalTool "gemini"
+$hasAgy      = Test-OptionalTool "agy"
 $hasCopilot  = Test-OptionalTool "copilot"
 
 # ─────────────────────────────────────────────
@@ -142,13 +142,12 @@ if ($hasOpenCode) {
     Write-Info "OpenCode not installed — skipping its config checks"
 }
 
-if ($hasGemini) {
-    Test-File "$env:USERPROFILE\.gemini\GEMINI.md"                    "Gemini system prompt"
-    Test-File "$env:USERPROFILE\.gemini\mcp-server-enablement.json"  "Gemini MCP enablement"
-    Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh"       "Gemini hook (sh)"
-    Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1"      "Gemini hook (ps1)"
+if ($hasAgy) {
+    Test-File "$env:USERPROFILE\.gemini\AGY.md"                     "Antigravity system prompt"
+    Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh"      "Antigravity hook (sh)"
+    Test-File "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1"     "Antigravity hook (ps1)"
 } else {
-    Write-Info "Gemini not installed — skipping its config/hook checks"
+    Write-Info "Antigravity CLI not installed — skipping its config/hook checks"
 }
 
 if ($hasCopilot) {

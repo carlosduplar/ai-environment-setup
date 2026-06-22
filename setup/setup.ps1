@@ -2,7 +2,7 @@
 # setup.ps1 — Install the full AI coding environment on Windows 11 + PowerShell 7
 # Usage: .\setup\setup.ps1 [-Update] [-DryRun] [-Verbose] [-GWS] [-Firebase] [-SkipVerify]
 # Must run from repo root.
-# Precondition: Agentic coder CLIs (claude, opencode, gemini, copilot) must be pre-installed
+# Precondition: Agentic coder CLIs (claude, opencode, agy, copilot) must be pre-installed
 
 param(
     [switch]$Update,      # Re-install / upgrade existing tools
@@ -291,19 +291,10 @@ $skillGroups = [ordered]@{
         "pptx", 
         "xlsx",
         "webapp-testing",
-        "frontend-design",
         "skill-creator"
-    )
-    "vercel-labs/agent-skills" = @(
-        "vercel-react-best-practices",
-        "vercel-react-native-skills",
-        "web-design-guidelines"
     )
     "vercel-labs/skills" = @(
         "find-skills"
-    )
-    "coreyhaines31/marketingskills" = @(
-        "seo-audit"
     )
     "microsoft/playwright-cli" = @(
         "playwright-cli"
@@ -451,7 +442,7 @@ $agents = @{}
 $agentList = @(
     @{ name = "claude";    cmd = "claude" },
     @{ name = "opencode";  cmd = "opencode" },
-    @{ name = "gemini";    cmd = "gemini" },
+    @{ name = "agy";       cmd = "agy" },
     @{ name = "copilot";   cmd = "copilot" }
 )
 
@@ -561,12 +552,11 @@ if ($agents.opencode) {
     )
 }
 
-if ($agents.gemini) {
+if ($agents.agy) {
     $sharedConfigs += @(
-        @{ src = "$configDir\gemini\GEMINI.md";                  dst = "$env:USERPROFILE\.gemini\GEMINI.md" },
-        @{ src = "$configDir\gemini\mcp-server-enablement.json"; dst = "$env:USERPROFILE\.gemini\mcp-server-enablement.json" },
-        @{ src = "$hooksDir\gemini-pre-tool-use.sh";             dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
-        @{ src = "$hooksDir\gemini-pre-tool-use.ps1";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
+        @{ src = "$configDir\antigravity\AGY.md";                   dst = "$env:USERPROFILE\.gemini\AGY.md" },
+        @{ src = "$hooksDir\antigravity-pre-tool-use.sh";            dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.sh" },
+        @{ src = "$hooksDir\antigravity-pre-tool-use.ps1";           dst = "$env:USERPROFILE\.gemini\hooks\pre-tool-use.ps1" }
     )
 }
 

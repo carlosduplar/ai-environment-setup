@@ -20,7 +20,7 @@ For each config file you want to add:
 |-------------|--------|
 | `~/.claude/settings.json` | Replace `ANTHROPIC_AUTH_TOKEN` value with `$ANTHROPIC_AUTH_TOKEN` |
 | `~/.config/opencode/opencode.json` | Replace `API_TOKEN` values with `$SERVICE_API_TOKEN` |
-| `~/.gemini/GEMINI.md` | Safe to commit as-is (no secrets) |
+| `~/.gemini/AGY.md` | Safe to commit as-is (no secrets) |
 | `~/.config/gws/` | Do NOT commit — OAuth credentials |
 | `~/.gitconfig` | Replace email/name with `<YOUR_*>` placeholders |
 
@@ -33,7 +33,7 @@ Run the security check before each commit:
 ## Phase 3 — Move system prompt / rules
 
 - [ ] Copy `~/.claude/CLAUDE.md` → `config/claude-code/CLAUDE.md`
-- [ ] Copy `~/.gemini/GEMINI.md` → `config/gemini/GEMINI.md`
+- [ ] Copy `~/.gemini/AGY.md` → `config/antigravity/AGY.md`
 - [ ] Copy any `~/.claude/rules/*.md` → `skills/catalog/`
 - [ ] Review each file for private info before committing
 

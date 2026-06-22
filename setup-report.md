@@ -36,7 +36,7 @@ Run `setup\verify.ps1` and paste output here:
 
 - [ ] Claude Code: tested `claude` command
 - [ ] OpenCode: tested `opencode` command
-- [ ] Gemini CLI: tested `gemini` command
+- [ ] Antigravity CLI: tested `agy` command
 - [ ] GitHub Copilot CLI: tested `gh copilot suggest`
 - [ ] gws: authenticated (`gws auth login`)
 - [ ] gcloud: authenticated (`gcloud auth login`)

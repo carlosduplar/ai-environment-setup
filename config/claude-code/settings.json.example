@@ -2,9 +2,18 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "$ANTHROPIC_AUTH_TOKEN",
-    "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "true",
-    "DISABLE_ERROR_REPORTING": "true",
-    "DISABLE_TELEMETRY": "true"
+    "DISABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "BASH_MAX_OUTPUT_LENGTH": "10000",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "180000",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "80",
+    "ENABLE_CLAUDE_CODE_SM_COMPACT": "true",
+    "DISABLE_INTERLEAVED_THINKING": "true",
+    "CLAUDE_CODE_DISABLE_ADVISOR_TOOL": "true",
+    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "true",
+    "CLAUDE_CODE_DISABLE_POLICY_SKILLS": "true",
+    "OTEL_LOG_USER_PROMPTS": "0",
+    "OTEL_LOG_TOOL_DETAILS": "0"
   },
   "permissions": {
     "allow": [
@@ -26,15 +35,12 @@
       "Bash(python -m pytest*)"
     ],
     "deny": [
-      "Read(*.env)",
+      "Read(./.env)",
       "Read(./.env.*)",
       "Read(./secrets/**)",
-      "Read(~/.ssh/**)",
-      "Edit(~/.ssh/**)",
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(ssh *)",
-      "Bash(rm -rf *)"
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Edit(./secrets/**)"
     ],
     "ask": [
       "Bash(npm install*)",
@@ -46,37 +52,52 @@
       "Bash(uv pip install*)"
     ]
   },
-  "enabledPlugins": {
-    "skill-creator@claude-plugins-official": true
-  },
   "hooks": {
-    "PreToolUse": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/hooks/pre-tool-use.sh"
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "(Edit|Write|Bash)",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/hooks/post-tool-use.sh"
-      }]
-    }],
-    "Notification": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/hooks/notification.sh"
-      }]
-    }],
-    "PostCompact": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "~/.claude/hooks/post-compact.sh"
-      }]
-    }]
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/pretooluse.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/file-guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/posttooluse.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-start-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
   }
 }

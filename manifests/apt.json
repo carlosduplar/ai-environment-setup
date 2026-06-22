@@ -1,0 +1,12 @@
+{
+  "$schema": "./apt.schema.json",
+  "description": "Linux apt packages — installed with 'sudo apt-get install'",
+  "packages": [
+    { "name": "git",         "description": "Version control" },
+    { "name": "jq",          "description": "JSON processor" },
+    { "name": "python3",     "description": "Python interpreter" },
+    { "name": "python3-pip", "description": "Python package manager" },
+    { "name": "curl",        "description": "HTTP client" },
+    { "name": "unzip",       "description": "Archive extraction" }
+  ]
+}

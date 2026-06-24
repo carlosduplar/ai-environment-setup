@@ -147,12 +147,13 @@
       "firebase functions:list*": "allow",
       "firebase --version*": "allow",
       "firebase help*": "allow",
-      "gws*": "allow"
+      "gws*": "allow",
+      "agy *": "allow",
+      "bx *": "allow"
     }
   },
   "agent": {
     "plan": {
-      "model": "github-copilot/claude-sonnet-4.6",
       "temperature": 0.2,
       "reasoningEffort": "high",
       "permission": {
@@ -163,7 +164,6 @@
       }
     },
     "auto": {
-      "model": "fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo",
       "temperature": 0.3,
       "reasoningEffort": "high",
       "permission": {
@@ -172,7 +172,6 @@
       }
     },
     "build": {
-      "model": "opencode/mimo-v2-pro-free",
       "temperature": 0.3,
       "reasoningEffort": "high",
       "permission": {

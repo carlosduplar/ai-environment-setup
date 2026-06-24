@@ -2,15 +2,24 @@
 
 Claude Code skills can be inspected with `npx skills ls --json`, updated with `npx skills update -g -y`, and added with `npx skills add <skill-name> -g -y`.
 
-## Core Skills
+## Currently Installed Skills
+
+### Core
 
 | Skill | Description | Always Apply | Category |
 |-------|-------------|-------------|----------|
 | **context7-cli** | Fetch current library docs from Context7 | **Yes** | Dev Tools |
+| find-docs | Up-to-date documentation for any developer technology | No | Dev Tools |
 | find-skills | Discover and install new skills | No | Skills |
 | skill-creator | Create/modify/test skills | No | Skills |
 
-## File Operations
+### Search & Research
+
+| Skill | Description | Always Apply | Category |
+|-------|-------------|-------------|----------|
+| bx | Web search, research, RAG, grounding, deep research | No | Search |
+
+### File Operations
 
 | Skill | Description | Always Apply | Category |
 |-------|-------------|-------------|----------|
@@ -19,18 +28,12 @@ Claude Code skills can be inspected with `npx skills ls --json`, updated with `n
 | pptx | PowerPoint file operations | No | Files |
 | xlsx | Spreadsheet file operations | No | Files |
 
-## Testing & Automation
+### Testing & Automation
 
 | Skill | Description | Always Apply | Category |
 |-------|-------------|-------------|----------|
 | playwright-cli | Browser automation via Playwright | No | Testing |
 | webapp-testing | Local web app testing with Playwright | No | Testing |
-
-## Dev Tools
-
-| Skill | Description | Always Apply | Category |
-|-------|-------------|-------------|----------|
-| gh-cli | GitHub CLI (`gh`) reference | No | Dev Tools |
 
 ## Optional Skills
 

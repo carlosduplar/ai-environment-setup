@@ -1,0 +1,45 @@
+{
+  "renderMarkdown": true,
+  "allowedUrls": [
+    "https://docs.github.com"
+  ],
+  "disableAllHooks": false,
+  "disabledMcpServers": [
+    "github-mcp-server"
+  ],
+  "enabledPlugins": {},
+  "includeCoAuthoredBy": false,
+  "keepAlive": "on",
+  "model": "gpt-5-mini",
+  "effortLevel": "low",
+  "subagents": {
+    "agents": {
+      "explore": {
+        "model": "gpt-5-mini",
+        "effortLevel": "low"
+      },
+      "task": {
+        "model": "gpt-5-mini",
+        "effortLevel": "low"
+      },
+      "general": {
+        "model": "gpt-5.4-mini",
+        "effortLevel": "medium"
+      }
+    }
+  },
+  "footer": {
+    "showModelEffort": true,
+    "showDirectory": true,
+    "showBranch": true,
+    "showContextWindow": true,
+    "showQuota": true,
+    "showAiUsed": true,
+    "showAgent": true,
+    "showCodeChanges": false,
+    "showUsername": false,
+    "showSandbox": true,
+    "showCustom": true
+  },
+  "disabledSkills": []
+}

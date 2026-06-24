@@ -1,27 +1,34 @@
 # Skills
 
-Claude Code skills are reusable instruction files that configure sub-agents for specific tasks. They live in `~/.claude/rules/` (global) or `.claude/rules/` (per-repo).
+Skills are reusable instruction files that configure sub-agents for specific tasks. They live in `~/.agents/skills/` (global) or `.claude/rules/` (per-repo for Claude Code).
 
 ## Install location
 
 ```
-~/.claude/rules/<skill-name>.md    # global, applies everywhere
-.claude/rules/<skill-name>.md      # project-scoped
+~/.agents/skills/<skill-name>/SKILL.md    # global, applies everywhere
+.claude/rules/<skill-name>.md             # project-scoped (Claude Code)
 ```
 
 ## Using a skill
 
-Skills are activated by name in the Copilot CLI or Claude Code session. For always-on rules, set `alwaysApply: true` in the front matter.
+Skills are activated by name in the AI tool session. For always-on rules, set `alwaysApply: true` in the front matter.
 
-## Skill catalog
+## Currently installed skills
 
-See [catalog/](catalog/) for all skill definitions.
+### Core
 
 | Skill | Always Apply | Description |
 |-------|-------------|-------------|
 | context7-cli | **Yes** | Fetch current library docs from Context7 |
+| find-docs | No | Up-to-date documentation for any developer technology |
 | find-skills | No | Discover and install new skills |
 | skill-creator | No | Create/modify/test skills |
+
+### Search & Research
+
+| Skill | Always Apply | Description |
+|-------|-------------|-------------|
+| bx | No | Web search, research, RAG, grounding, deep research |
 
 ### File Operations
 
@@ -39,12 +46,6 @@ See [catalog/](catalog/) for all skill definitions.
 | playwright-cli | No | Browser automation via Playwright |
 | webapp-testing | No | Local web app testing with Playwright |
 
-### Dev Tools
-
-| Skill | Always Apply | Description |
-|-------|-------------|-------------|
-| gh-cli | No | GitHub CLI (`gh`) reference |
-
 ### Google Workspace (requires `-GWS` flag)
 
 | Skill | Always Apply | Description |
@@ -59,14 +60,17 @@ See [catalog/](catalog/) for all skill definitions.
 
 ## Adding a skill
 
-```powershell
-# Install a skill globally (affects all Claude Code sessions)
-# 1. Place the skill .md file in ~/.claude/rules/
-# 2. Or use the skill-creator skill to generate from a description
+```bash
+# Install a skill globally (affects all AI tool sessions)
+npx skills add <skill-name> -g -y
 
-Copy-Item skills/catalog/my-skill.md "$env:USERPROFILE\.claude\rules\"
+# List installed skills
+npx skills ls -g
+
+# Update installed global skills
+npx skills update -g -y
 ```
 
 ## Updating skills
 
-Skills installed via `skill-creator` can be updated in-session. For skills in this repo, update the `.md` file and re-copy to `~/.claude/rules/`.
+Skills installed via `skill-creator` can be updated in-session. For skills in this repo, update the `.md` file and re-copy to `~/.agents/skills/`.

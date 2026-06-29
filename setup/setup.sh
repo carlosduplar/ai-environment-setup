@@ -23,7 +23,7 @@ fi
 
 # Detect WSL2 environment
 IS_WSL=false
-if grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null || [[ "$(uname -r)" == * microsoft * ]]; then
+if grep -qiE '(microsoft|wsl)' /proc/version 2>/dev/null || [[ "$(uname -r)" == *microsoft* ]]; then
     IS_WSL=true
 fi
 
